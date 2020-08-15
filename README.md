@@ -30,7 +30,7 @@ Solution to "Modern Compiler Implementation in ML" implemented in Ocaml
   - [ ] Foundation Notes
   - [x] [Implementation Notes](https://www.ltzhou.com/ml-parser/#implementation) (*Aug 15th, 2020*)
 - [x] Programming: use Menhir to write the parsing rule for Tiger Language 
-  - [x] [Basic Rules](tiger/frontend/parser.mly)  (*Aug 15th, 2020*)
+  - [x] [Basic Rules](tiger/lib/frontend/parser.mly)  (*Aug 15th, 2020*)
   - [ ] (Optional) Implement some error recovery strategies
 - [ ] Exercises
 
@@ -38,6 +38,7 @@ Solution to "Modern Compiler Implementation in ML" implemented in Ocaml
 - [x] Reading (*Aug 14th, 2020*)
   - [ ] Notes
 - [ ] Programming: Add semantic actions to the parser
+  - [x] Transplant the `Symbol` [library](tiger/lib/ast/symbol.ml) (a module to turn string into symbols)  (*Aug 15th, 2020*)
 - [ ] Exercises
 
 
