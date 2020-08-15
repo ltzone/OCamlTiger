@@ -14,9 +14,25 @@ categories:
 
 <!--more-->
 
+Motivation: finite automaton can't recognize balanced parentheses, we need something more powerful than finite automata to parse language described by **grammars**.
+
 ## Context-free grammars
+- can be userd to define lexical structure in a static, declarative way
+- derivations: start with the start symbol, repeatedly replace any non terminal by one of its right-hand sides
+  - leftmost derivation: always expand leftmost
+  - rightmost derivation: AKA _left-to-right parse_, _LR parse_
+- a grammar is **ambiguous** if it can derive with two distinct parse trees
+- Usually ambiguity is eliminated by transforming grammar
+- EOF Markers are necessary
 
 ## Predictive Parsing
+1. simple: recursive descent/predictive parsing
+   - easy to implement in ML-language (by mutually-recursive functions)
+   - only works when *the first terminal of each subexpression provides enough information to choose which production to use*
+   - i.e. every righthand side has different `FIRST` sets.
+
+
+
 
 ## LR Parsing
 
