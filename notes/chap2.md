@@ -6,17 +6,19 @@ tags:
 - Modern Compiler Implementation in OCaml
 
 categories: 
-- study
+- Study
 
 ---
-
-<!--more-->
-
-[toc]
 
 > A compiler first pulls the original language **apart** and then puts it **together** as another language. The front end of the compiler performs **analysis**; the back end does **synthesis**.
 
 **Analysis** usually involoves lexical, syntax, and semantic analysis. Sometimes lexical analysis is integrated into the parser. However, seperating lexical analysis from parsing can eliminate the trouble of dealing with white space or comments.
+
+In this chapter, the book introduces how lexical analysis rules are described on the notion of _*Regular Expressions*_, and how they are converted to _*NFA*_ or _*DFA*_ (by means of the iterating algorithm) in order to be implemented.
+
+[toc]
+
+<!--more-->
 
 ## Lexical Tokens
 

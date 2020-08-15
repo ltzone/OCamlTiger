@@ -1,0 +1,26 @@
+
+** Conflict (shift/reduce) in state 65.
+** Token involved: ELSE
+** This state is reached from program after reading:
+
+IF exp THEN IF exp THEN exp 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+exp EOF 
+(?)
+
+** In state 65, looking ahead at ELSE, shifting is permitted
+** because of the following sub-derivation:
+
+IF exp THEN exp ELSE exp 
+            IF exp THEN exp . ELSE exp 
+
+** In state 65, looking ahead at ELSE, reducing production
+** exp -> IF exp THEN exp 
+** is permitted because of the following sub-derivation:
+
+IF exp THEN exp ELSE exp // lookahead token appears
+            IF exp THEN exp . 
