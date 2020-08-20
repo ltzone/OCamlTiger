@@ -56,4 +56,5 @@ You should write the parser rules in the `.mly` file, and the `ml` code for pars
 1. Install Menhir `opam install menhir`
 2. Write your `.mly` rules
 3. run `menhir parser.mly` to generate the code
-4. You may also add switches like `--explain` to debug your parser
+4. You may also add switches like `--explain` to test your grammar
+5. For now, we may leave the semantic action `{}` after the production empty, we will fill them in the next chapter. As a result, the generated `parser.ml` will not be executable at present.

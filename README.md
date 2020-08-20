@@ -36,10 +36,11 @@ Solution to "Modern Compiler Implementation in ML" implemented in Ocaml
 
 ### Chapter 4 Abstract Syntax
 - [x] Reading (*Aug 14th, 2020*)
-  - [ ] Notes
+  - [ ] Foundation Notes
+  - [x] [Implementation Notes](https://www.ltzhou.com/ml-ast/#implementation) (*Aug 20th, 2020*)
 - [ ] Programming: Add semantic actions to the parser
   - [x] Transplant the `Symbol` [library](tiger/lib/ast/symbol.ml) (a module to turn string into symbols)  (*Aug 15th, 2020*)
-  - [x] Semantic Actions: [build AST](tiger/lib/ast/parser.mly) (*Aug 20th, 2020*)
+  - [x] Semantic Actions: [build AST](tiger/lib/frontend/parser.mly) (*Aug 20th, 2020*)
   - [ ] Driver and Test Cases
   - [ ] Explicitly resolve shift/reduce conflicts
   - [ ] More Error Recovery, a better `pos` setting
