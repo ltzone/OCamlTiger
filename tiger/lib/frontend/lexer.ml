@@ -1111,12 +1111,12 @@ and __ocaml_lex_read_rec lexbuf __ocaml_lex_state =
 
   | 44 ->
 # 68 "lexer.mll"
-            ( read_string lexbuf)
+            ( read_string (Buffer.create 17) lexbuf )
 # 1116 "lexer.ml"
 
   | 45 ->
 # 69 "lexer.mll"
-            ( read_comment lexbuf)
+            ( read_comment lexbuf )
 # 1121 "lexer.ml"
 
   | 46 ->

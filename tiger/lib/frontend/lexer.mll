@@ -65,8 +65,8 @@ rule read =
   | "do"    { DO }
   | "break" { BREAK }
   | "array" { ARRAY }
-  | '"'     { read_string lexbuf}
-  | "/*"    { read_comment lexbuf}
+  | '"'     { read_string (Buffer.create 17) lexbuf }
+  | "/*"    { read_comment lexbuf }
   | _       { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
   | eof     { EOF }
 
