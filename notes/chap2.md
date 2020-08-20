@@ -122,3 +122,7 @@ and …
     + *shortest* applies the "shortest match" rule, usally used as a simple text processing tool
 - *action*s are arbitrary OCaml expressions. To create expressions, you can use the *as* binding in the regular expression, or the *lexbuf* bound in the current buffer in the Lexing standard library.
 - *refill-handler* is an advanced operation to take control of the originally silent refilling action.
+
+
+
+- pay attention to the precedence of regexp

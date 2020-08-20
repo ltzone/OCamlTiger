@@ -20,31 +20,8 @@ let id = ['a'-'z' 'A'-'Z'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
 
 rule read =
   parse
-  | int    { INT (int_of_string (Lexing.lexeme lexbuf)) }
-  | id     { ID (Lexing.lexeme lexbuf) }
-  | white  { read lexbuf }  (* skip blanks *)
-  | newline { next_line lexbuf;read lexbuf }
-  | '*'     { TIMES }
-  | ';'     { SEMICOLON }
-  | ')'     { RPAREN }
-  | ']'     { RBRACK }
-  | '}'     { RBRACE }
-  | '+'     { PLUS }
-  | '|'     { OR }
-  | '-'     { MINUS }
-  | '<'     { LT }
-  | '('     { LPAREN }
-  | '['     { LBRACK }
-  | '{'     { LBRACE }
-  | '>'     { GT }
-  | '='     { EQ }
-  | '.'     { DOT }
-  | '/'     { DIVIDE }
-  | ','     { COMMA }
-  | ':'     { COLON }
-  | '&'     { AND }
   | "<="    { LE }
-  | "!="    { NEQ }
+  | "<>"    { NEQ }
   | ">="    { GE }
   | ":="    { ASSIGN }
   | "while" { WHILE }
@@ -65,8 +42,31 @@ rule read =
   | "do"    { DO }
   | "break" { BREAK }
   | "array" { ARRAY }
-  | '"'     { read_string (Buffer.create 17) lexbuf }
+  | int    { INT (int_of_string (Lexing.lexeme lexbuf)) }
+  | id     { ID (Lexing.lexeme lexbuf) }
+  | white  { read lexbuf }  (* skip blanks *)
+  | newline { next_line lexbuf;read lexbuf }
+  | '*'     { TIMES }
+  | ';'     { SEMICOLON }
+  | ')'     { RPAREN }
+  | ']'     { RBRACK }
+  | '}'     { RBRACE }
+  | '+'     { PLUS }
+  | '|'     { OR }
+  | '-'     { MINUS }
+  | '<'     { LT }
+  | '('     { LPAREN }
+  | '['     { LBRACK }
+  | '{'     { LBRACE }
+  | '>'     { GT }
+  | '='     { EQ }
+  | '.'     { DOT }
   | "/*"    { read_comment lexbuf }
+  | '/'     { DIVIDE }
+  | ','     { COMMA }
+  | ':'     { COLON }
+  | '&'     { AND }
+  | '"'     { read_string (Buffer.create 17) lexbuf }
   | _       { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
   | eof     { EOF }
 

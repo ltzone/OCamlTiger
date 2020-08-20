@@ -41,11 +41,12 @@ Solution to "Modern Compiler Implementation in ML" implemented in Ocaml
 - [ ] Programming: Add semantic actions to the parser
   - [x] Transplant the `Symbol` [library](tiger/lib/ast/symbol.ml) (a module to turn string into symbols)  (*Aug 15th, 2020*)
   - [x] Semantic Actions: [build AST](tiger/lib/frontend/parser.mly) (*Aug 20th, 2020*)
-  - [ ] Driver and Test Cases
-  - [ ] Explicitly resolve shift/reduce conflicts
+  - [x] [Driver](tiger/driver/util.ml) and [Test Cases](tiger/testcases) (*Aug 20th, 2020*)
+  - [x] Explicitly resolve shift/reduce conflicts (*Aug 20th, 2020*)
   - [ ] More Error Recovery, a better `pos` setting
 - [ ] Exercises
 
+> To Run the parser, `cd tiger; make; dune utop`, then execute `Util.parse_file "testcases/yourtestfile.tig"` in utop to check the parsed syntax tree
 
 ## References
 

@@ -1,67 +1,5 @@
 
-** Conflict (shift/reduce) in state 113.
-** Token involved: FUNCTION
-** This state is reached from program after reading:
-
-LET fundec 
-
-** The derivations that appear below have the following common factor:
-** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
-
-program 
-exp EOF 
-LET nonempty_list(dec) IN expseq END 
-    (?)
-
-** In state 113, looking ahead at FUNCTION, shifting is permitted
-** because of the following sub-derivation:
-
-dec 
-nonempty_list(fundec) 
-fundec nonempty_list(fundec) 
-       fundec 
-       . FUNCTION ID LPAREN loption(separated_nonempty_list(COMMA,tyfield)) RPAREN EQ exp 
-
-** In state 113, looking ahead at FUNCTION, reducing production
-** nonempty_list(fundec) -> fundec 
-** is permitted because of the following sub-derivation:
-
-dec nonempty_list(dec) // lookahead token appears because nonempty_list(dec) can begin with FUNCTION
-nonempty_list(fundec) // lookahead token is inherited
-fundec . 
-
-** Conflict (shift/reduce) in state 102.
-** Token involved: TYPE
-** This state is reached from program after reading:
-
-LET tydec 
-
-** The derivations that appear below have the following common factor:
-** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
-
-program 
-exp EOF 
-LET nonempty_list(dec) IN expseq END 
-    (?)
-
-** In state 102, looking ahead at TYPE, reducing production
-** nonempty_list(tydec) -> tydec 
-** is permitted because of the following sub-derivation:
-
-dec nonempty_list(dec) // lookahead token appears because nonempty_list(dec) can begin with TYPE
-nonempty_list(tydec) // lookahead token is inherited
-tydec . 
-
-** In state 102, looking ahead at TYPE, shifting is permitted
-** because of the following sub-derivation:
-
-dec 
-nonempty_list(tydec) 
-tydec nonempty_list(tydec) 
-      tydec 
-      . TYPE ID EQ ty 
-
-** Conflict (shift/reduce) in state 66.
+** Conflict (shift/reduce) in state 80.
 ** Token involved: ELSE
 ** This state is reached from program after reading:
 
@@ -74,13 +12,13 @@ program
 exp EOF 
 (?)
 
-** In state 66, looking ahead at ELSE, shifting is permitted
+** In state 80, looking ahead at ELSE, shifting is permitted
 ** because of the following sub-derivation:
 
 IF exp THEN exp ELSE exp 
             IF exp THEN exp . ELSE exp 
 
-** In state 66, looking ahead at ELSE, reducing production
+** In state 80, looking ahead at ELSE, reducing production
 ** exp -> IF exp THEN exp 
 ** is permitted because of the following sub-derivation:
 

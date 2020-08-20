@@ -52,7 +52,6 @@ In this chapter, we will add semantic actions to our parser to generated the abs
       module S = Ast.Symbol
      %}
      ```
-   - For now, there are three shift/reduce conflicts, they are currently resolved by shifting
+   - For now, there are only one shift/reduce conflicts, they are currently resolved by shifting
       - `if then ... else ...`
-      - `fundec list` and `dec list`
-      - `tydec list` and `dec list`
+   - Other conflicts such as `array [exp] of ... ` have been resolved by explicitly adding dummy rules

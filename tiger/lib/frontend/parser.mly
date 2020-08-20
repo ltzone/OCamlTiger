@@ -1,6 +1,7 @@
 %{
   module A = Ast.Absyn
   module S = Ast.Symbol
+
 %}
 
 
@@ -128,9 +129,6 @@ exp_basic:
           else'= Some (IntExp 0);
           pos= $startofs
       } }
-
-exp:
-  | e1 = exp_basic { e1 }
   | fun_id = ID; LPAREN; exps = separated_list(COMMA, exp);RPAREN 
       {
         A.CallExp {
@@ -139,6 +137,9 @@ exp:
           pos= $startofs
         }
       }
+
+exp:
+  | e1 = exp_basic { e1 }
   | v = lvalue; ASSIGN; e = exp
       {
         A.AssignExp {
@@ -149,6 +150,8 @@ exp:
       }
   | LPAREN ; elis = expseq ; RPAREN
       { elis }
+  | LPAREN ; RPAREN
+      { A.NilExp }
   | IF; e1 = exp; THEN; e2 = exp; ELSE; e3 = exp
       {
         A.IfExp {
@@ -187,7 +190,7 @@ exp:
         }
       }
   | BREAK {(A.BreakExp ($startofs))}
-  | LET; dec_lis = nonempty_list(dec); IN; exps = expseq; END
+  | LET; dec_lis = decs; IN; exps = expseq; END
       {
         A.LetExp {
           decs= dec_lis;
@@ -195,14 +198,45 @@ exp:
           pos= $startofs
         }
       }
+  | type_id = ID ; LBRACK; exp1 = exp; RBRACK; OF; exp2 = exp
+      {
+        A.ArrayExp { 
+          typ= (S.symbol type_id); 
+          size= exp1; 
+          init= exp2; 
+          pos= $startofs }
+      }
+  | type_id = ID ; LBRACE; rec_fields = separated_list(COMMA, exp_field);  RBRACE
+      {
+        A.RecordExp {
+          fields= rec_fields;
+          typ= S.symbol type_id;
+          pos= $startofs
+        }
+      }
 
+%inline exp_field:
+| field_id = ID; EQ; exp1 = exp
+  {
+    (S.symbol field_id, exp1, $startofs )
+  }
 
 lvalue:
   | i = ID           
       { A.SimpleVar (S.symbol i, $startofs) }
-  | v = lvalue ; LBRACK; e = exp; RBRACK
+  | i = lvalue_t
+      { i }
+
+lvalue_t: // <--- How shift/reduce conflict mentioned on Page 82 is resolved 
+  | v = ID ; LBRACK; e = exp; RBRACK
+      { A.SubscriptVar (A.SimpleVar (S.symbol v, $startofs),
+                        e, $startofs)}
+  | v = lvalue_t ; LBRACK; e = exp; RBRACK
       { A.SubscriptVar (v, e, $startofs)}
-  | v = lvalue ; DOT; i = ID
+  | v = ID ; DOT; i = ID
+      { (A.FieldVar (A.SimpleVar (S.symbol v, $startofs),
+                     S.symbol i, $startofs)) }
+  | v = lvalue_t ; DOT; i = ID
       { (A.FieldVar (v, S.symbol i, $startofs)) }
 
 expseq:
@@ -217,10 +251,22 @@ expseq:
 
 
 // declarations
-dec:
-  | tydecs = nonempty_list(tydec)  { A.TypeDec (tydecs) }
-  | vdec = vardec { vdec }
-  | fundecs = nonempty_list(fundec) { A.FunctionDec (fundecs) }
+decs:
+  | (* empty *)    { [] }
+  | ty_dec = tydec; decs_tl = decs 
+    { match decs_tl with
+      | [] -> [ A.TypeDec [ty_dec] ]
+      | hd :: tl -> match hd with
+                    | A.TypeDec ty_dec' -> A.TypeDec (ty_dec::ty_dec') :: tl
+                    | _ -> A.TypeDec [ty_dec] :: tl }
+  | vdec = vardec; decs_tl = decs 
+    { vdec::decs_tl }
+  | fun_dec = fundec; decs_tl = decs 
+    { match decs_tl with
+      | [] -> [ A.FunctionDec [fun_dec] ]
+      | hd :: tl -> match hd with
+                    | A.FunctionDec fun_dec' -> A.FunctionDec (fun_dec::fun_dec') :: tl
+                    | _ -> A.FunctionDec [fun_dec] :: tl  }
 
 // type declarations
 tydec:
@@ -287,7 +333,7 @@ fundec:
         pos= $startofs
       }
     }
-  | FUNCTION ; fun_id = ID ; LPAREN; type_fields = separated_list(COMMA, tyfield); RPAREN ; COMMA ; type_id = ID ; EQ ; e = exp
+  | FUNCTION ; fun_id = ID ; LPAREN; type_fields = separated_list(COMMA, tyfield); RPAREN ; COLON ; type_id = ID ; EQ ; e = exp
     {
       {
         name= S.symbol fun_id;
