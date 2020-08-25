@@ -36,7 +36,7 @@ Solution to "Modern Compiler Implementation in ML" implemented in Ocaml
 
 ### Chapter 4 Abstract Syntax
 - [x] Reading (*Aug 14th, 2020*)
-  - [ ] Foundation Notes
+  - [x] Foundation Notes(https://www.ltzhou.com/ml-ast) (*Aug 25th, 2020*)
   - [x] [Implementation Notes](https://www.ltzhou.com/ml-ast/#implementation) (*Aug 20th, 2020*)
 - [ ] Programming: Add semantic actions to the parser
   - [x] Transplant the `Symbol` [library](tiger/lib/ast/symbol.ml) (a module to turn string into symbols)  (*Aug 15th, 2020*)
@@ -45,6 +45,10 @@ Solution to "Modern Compiler Implementation in ML" implemented in Ocaml
   - [x] Explicitly resolve shift/reduce conflicts (*Aug 20th, 2020*)
   - [ ] More Error Recovery, a better `pos` setting
 - [ ] Exercises
+  - [x] 4.1 Regular Expression Abstract Syntax (*Aug 25th, 2020*)
+  - [x] 4.2 ~ 4.4 Straight Line Interpreter implemented in Menhir through semantic actions (*Aug 25th, 2020*)
+  - [ ] 4.5 Straight Line Interpreter implemented in Recursive Descent
+  - [ ] 4.6 rewrite recursion direction
 
 > To Run the parser, `cd tiger; make; dune utop`, then execute `Util.parse_file "testcases/yourtestfile.tig"` in utop to check the parsed syntax tree
 

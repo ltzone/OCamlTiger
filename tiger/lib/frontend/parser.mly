@@ -151,7 +151,7 @@ exp:
   | LPAREN ; elis = expseq ; RPAREN
       { elis }
   | LPAREN ; RPAREN
-      { A.NilExp }
+      { A.SeqExp [] }
   | IF; e1 = exp; THEN; e2 = exp; ELSE; e3 = exp
       {
         A.IfExp {
