@@ -55,3 +55,81 @@ val empty : 'a table
 val enter : 'a table * symbol * 'a -> 'a table
 val look  : 'a table * symbol -> 'a option 
 ```
+
+
+### Imperative Style Symbol Tables
+
+```OCaml
+(** symbol.mli *)
+type 'a table
+val new : unit -> 'a table
+val enter : 'a table * symbol * 'a -> unit
+val look  : 'a table * symbol -> 'a option
+
+val beginScope : 'a table -> unit
+val endScope: 'a table -> unit
+```
+
+- `beginScope` and `endScope` come in pairs to handle the undo requirements of destuctive update.
+- and the undo operation have to work with a stack order
+- we also need an auxiliary stack, when `beginScope`, a special marker is pushed onto the table and `endScope` will pop until the marker.
+
+
+## Bindings for the Tiger Compiler
+
+### Types
+
+```OCaml
+type unique = unit ref
+(* since each ref is unique, we can test record for equal ones *)
+
+type ty = 
+  | INT
+  | STRING
+  | RECORD of (Ast.Symbol.symbol * ty) list * unique (* array elements and unique marker*)
+  | ARRAY of ty * unique
+  | NIL (* any type *)
+  | UNIT (* no value returned *)
+  | NAME of Ast.Symbol.symbol * ty option ref
+  (* provides holder for mutually defined types *)
+  (* where NAME(sym, ref(Some t)) is equivalent to type t *)
+  (* and NAME(sym, ref(None)) is just place-holder *)
+```
+
+- equal types:
+  - this is illegal in tiger, since every record is unique.
+    ```Tiger
+    let type a = {x:int, y:int }
+        type b = {x:int, y:int } (* a type declaration *)
+        var i : a := ...
+        var j : b := ...
+    in i := j
+    end
+    ```
+  - this is legal
+    ```Tiger
+    let type a = {x:int, y:int }
+        type b = a (* a type expression *)
+        var i : a := ...
+        var j : b := ...
+    in i := j
+    end
+    ```
+
+### Environments
+
+- One environment will not suffice
+  ```Tiger
+  let type a = int
+      var a : a := 5
+      var b : a := a
+    in b + a
+  end
+  ```
+- we need both a **type environment** and **value environment**
+  - `tenv: Types.ty Symbol.table = symbol -> ty`
+  - `venv: enventry Symbol.table = symbol -> enventry`
+  - where `enventry = VarEntry of ty | Fun Entry of formals type * result type`
+
+
+
