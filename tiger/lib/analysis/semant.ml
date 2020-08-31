@@ -135,13 +135,59 @@ let rec transExp venv tenv (e:A.exp) : expty =
           List.fold_left update_env (venv,tenv) decs in
         transExp new_venv new_tenv body
   in trexp e
-and transVar venv tenv v : expty = assert false
+and transVar venv tenv v: expty =
+  let rec trvar = function
+  | A.SimpleVar (s,pos) ->
+      (match S.look (venv,s) with
+      | None -> E.error pos ("undefined variable " ^ S.name s);
+                {exp=();ty=T.NIL}
+      | Some (Env.VarEntry {ty}) -> {exp=();ty=ty}
+      | Some (Env.FunEntry _) -> 
+                E.error pos (S.name s ^ " is not a variable");
+                {exp=();ty=T.NIL})
+  | A.FieldVar (var,s,pos) ->
+      let {exp=_;ty=var_ty} = trvar var in
+        (match var_ty with
+        | T.RECORD (record_tys, _) ->
+           let _, field_ty = 
+            List.find (fun (record_s,_) -> s = record_s) record_tys in
+           {exp=();ty=field_ty}
+        | _ -> E.error pos (S.name s ^ " is not a valid field name");
+               {exp=();ty=T.NIL})
+  | A.SubscriptVar (var,exp,pos) -> 
+      let {exp=_;ty=exp_ty} = transExp venv tenv exp in
+        (match exp_ty with
+        | T.INT -> 
+          ( let {exp=_;ty=var_ty} = trvar var in
+            match var_ty with
+            | T.ARRAY (a_ty, _) -> {exp=();ty=a_ty}
+            | _ -> E.error pos ("Not an array type");
+                   {exp=();ty=T.NIL})
+        | _ -> E.error pos ("Not a valid integer index");
+               {exp=();ty=T.NIL})
+  in trvar v
+
 
 and transDec venv tenv d : venv * tenv = assert false
 
-and transTy tenv t : expty = assert false
-
-
+and transTy tenv t : expty = match t with
+  | A.ArrayTy (symbol,pos) ->
+      (match S.look (tenv,symbol) with
+      | None -> E.error pos ("undefined type name " ^ S.name symbol);
+                {exp=();ty=T.NIL}
+      | Some arty -> {exp=();ty=T.ARRAY(arty,ref ())})
+  | A.RecordTy fieldlis ->
+      let walk_field (f:A.field) = 
+      ( match S.look (tenv,f.typ) with
+        | Some ty -> (f.name, ty)
+        | None -> E.error f.pos ("undefined type name "^ S.name f.typ);(f.name, T.NIL)
+      ) in let rec_type = List.map walk_field fieldlis in
+      {exp=();ty=T.RECORD(rec_type,ref ())}
+  | A.NameTy (symbol,pos) ->
+      (match S.look (tenv,symbol) with
+        | None -> E.error pos ("undefined type name " ^ S.name symbol);
+                  {exp=();ty=T.NIL}
+        | Some ty -> {exp=();ty=ty})
 
 (*
 val transDec : venv * tenv * Ast.Absyn.dec -> venv * tenv

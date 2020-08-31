@@ -5,7 +5,16 @@ type enventry = VarEntry of {ty : T.ty}
 
 let base_tenv: T.ty Ast.Symbol.table =
   let open Ast.Symbol in
-    empty
+  let stand_lib = 
+    [
+      ("int", T.INT);
+      ("string", T.STRING);
+      ("unit",T.UNIT);    
+      ("nil",T.NIL);
+    ] in
+    let update_table tab elem =
+      enter (tab, symbol (fst elem), snd elem) in
+    List.fold_left update_table empty stand_lib
 
 let base_venv: enventry Ast.Symbol.table = 
 let open Ast.Symbol in

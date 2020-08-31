@@ -1,5 +1,5 @@
 ---
-title: 【OCaml Tiger】Chapter 4 Abstract Syntax
+title: 【OCaml Tiger】Chapter 5 Semantic Actions
 url: ml-semantic
 date: 2020-08-20 15:04:09
 tags: 
@@ -132,4 +132,13 @@ type ty =
   - where `enventry = VarEntry of ty | Fun Entry of formals type * result type`
 
 
+
+## Implementation
+
+
+### Type-Checking Expressions
+
+
+
+### Type-Checking Declarations
 
