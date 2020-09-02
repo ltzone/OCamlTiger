@@ -14,6 +14,11 @@ let checkInt {exp;ty} pos : Translate.exp =
     | T.INT -> ()
     | _ -> Errormsg.error pos "integer required"
 
+let lookType tenv ty_name pos = 
+  match S.look (tenv, ty_name) with
+  | None -> E.error pos ("undefined type name " ^ S.name ty_name);T.NIL
+  | Some ty -> ty
+
 let rec transExp venv tenv (e:A.exp) : expty =
   let _ = venv in
   let _ = tenv in
@@ -168,7 +173,61 @@ and transVar venv tenv v: expty =
   in trvar v
 
 
-and transDec venv tenv d : venv * tenv = assert false
+and transDec venv tenv d : venv * tenv = match d with
+  | A.VarDec {name;escape=_;typ=None;init;pos=_} ->
+      let {exp=_;ty} = transExp venv tenv init in
+      (S.enter (venv, name, Env.VarEntry {ty=ty}), tenv)
+  | A.VarDec {name;escape=_;typ=Some (ty_name,ty_pos);init;pos=_} ->
+      let {exp=_;ty} = transExp venv tenv init in
+      (match (S.look (tenv, ty_name)) with
+      | None -> E.error ty_pos ("undefined type name "^ S.name ty_name);
+                (venv,tenv)
+      | Some ty' -> if ty = ty' 
+            then (S.enter (venv, name, Env.VarEntry {ty=ty}), tenv)
+            else (E.error ty_pos ("type "^ S.name ty_name ^ " not match");
+            (venv,tenv)))
+  | A.TypeDec tydeclis ->
+      let mkheader tenv ({name;ty=_;pos=_}:A.typedec) =
+        S.enter(tenv,name,T.NAME(name, ref None)) in
+      let tenv' = List.fold_left mkheader tenv tydeclis in
+      let trTy ({name;ty=ty_exp;pos=_}:A.typedec) = 
+        match S.look (tenv', name) with
+        | Some (T.NAME (_, real_ty)) ->
+            real_ty := (
+              let {ty=ty_res;exp=_} = transTy tenv' ty_exp in
+              Some ty_res )
+        | _ -> assert false (* impossible *) in
+      List.iter trTy tydeclis;(venv,tenv')
+  | A.FunctionDec fundeclis ->
+      (* gather information about the header of each function*)
+      let find_formal_type
+        ({name=_;escape=_;typ=param_typ;pos}:A.field) = 
+          lookType tenv param_typ pos in
+      let mkheader_sig venv
+        ({name;params;result;body=_;pos=_}:A.fundec) =
+        let formals = List.map find_formal_type params in
+        let result = match result with
+          | None -> T.UNIT
+          | Some (ty,pos) -> lookType tenv ty pos in
+        S.enter (venv,name,Env.FunEntry{formals=formals;result=result}) in
+      let venv' = List.fold_left mkheader_sig venv fundeclis in
+
+      (* process each function body *)
+      let process_function ({name;params;result;body;pos}:A.fundec) =
+        let enter_args venv
+          ({name;escape=_;typ=param_typ;pos}:A.field) = 
+          S.enter (venv, name, Env.VarEntry {ty=lookType tenv param_typ pos}) in
+        let func_venv = List.fold_left enter_args venv' params in
+        let {exp=_;ty=ret_ty} = transExp func_venv tenv body in
+        let result = match result with
+          | None -> T.UNIT
+          | Some (ty,pos) -> lookType tenv ty pos in
+        if ret_ty = result then ()
+        else E.error pos ("Wrong Return Type of Function "^ S.name name)
+      in
+
+      List.iter process_function fundeclis;
+      (venv',tenv)
 
 and transTy tenv t : expty = match t with
   | A.ArrayTy (symbol,pos) ->
@@ -184,14 +243,26 @@ and transTy tenv t : expty = match t with
       ) in let rec_type = List.map walk_field fieldlis in
       {exp=();ty=T.RECORD(rec_type,ref ())}
   | A.NameTy (symbol,pos) ->
-      (match S.look (tenv,symbol) with
-        | None -> E.error pos ("undefined type name " ^ S.name symbol);
-                  {exp=();ty=T.NIL}
-        | Some ty -> {exp=();ty=ty})
+      let rec find_mult symbol' rec_env =
+        if S.look (rec_env, symbol') = Some ()
+        then (E.error pos ("cyclic definition in " ^ S.name symbol');
+              {exp=();ty=T.NIL})
+        else
+        (match S.look (tenv,symbol') with
+          | None -> E.error pos ("undefined type name " ^ S.name symbol);
+                    {exp=();ty=T.NIL}
+          | Some (NAME (sym, tref)) -> (match !tref with
+            | Some ty -> {exp=();ty=ty}
+            | None -> 
+              let new_rec_env = S.enter (rec_env,sym,()) in
+              let actual_sem = find_mult sym new_rec_env in
+              actual_sem
+            )
+          | Some other_ty -> {exp=();ty=other_ty})
+      in find_mult symbol S.empty 
 
-(*
-val transDec : venv * tenv * Ast.Absyn.dec -> venv * tenv
-val transTy :         tenv * Ast.Absyn.ty -> expty
 
-val transProg : Ast.Absyn.exp -> unit
-*)
+
+let transProg  (e:Ast.Absyn.exp): unit = 
+  let {exp=_;ty=_} = transExp Env.base_venv Env.base_tenv e in
+    ()

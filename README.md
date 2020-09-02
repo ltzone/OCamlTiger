@@ -53,17 +53,16 @@ Solution to "Modern Compiler Implementation in ML" implemented in Ocaml
 > To Run the parser, `cd tiger; make; dune utop`, then execute `Util.parse_file "testcases/yourtestfile.tig"` in utop to check the parsed syntax tree
 
 ### Chapter 5 Semantic Actions
-- [x] Reading (*Aug 27th, 2020*)
-  - [x] Foundation Notes(https://www.ltzhou.com/ml-semantic/) (*Aug 27th, 2020*)
+- [x] Reading
+  - [x] [Foundation Notes](https://www.ltzhou.com/ml-semantic/) (*Aug 27th, 2020*)
   - [ ] Implementation Notes
-- [ ] Programming Part A:
+- [x] Programming Part A: (*Sept 2nd, 2020*)
   - [x] [Simple Type Checker](tiger/lib/analysis/semant.ml) (*Aug 31st, 2020*)
-  - [ ] Declaration Processor
+  - [x] [Declaration Processor](tiger/lib/analysis/semant.ml) (*Sept 2nd, 2020*)
 - [ ] Programming Part B:
-  - [ ] Handle Recursive Functions
-  - [ ] Handle Mutually Recursive Functions
-  - [ ] Recursive Type Declarations
+  - [x] [Handle (Mutually) Recursive Functions, Types Declarations](tiger/lib/analysis/semant.ml) (*Sept 2nd, 2020*)
   - [ ] Correct Nesting of break statements
+  - [ ] Driver and TestCases
 - [ ] Exercises
   - [ ] Improve HashTable Implementation
   - [ ] efficient data structure for environment "adding"
