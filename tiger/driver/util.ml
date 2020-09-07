@@ -23,3 +23,11 @@ let parse_file filename =
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   let res = parse_with_error lexbuf in
   In_channel.close inx; res
+
+
+let semant_check filename =
+  let parse_res = parse_file filename in
+  match parse_res with
+  | None -> assert false
+  | Some parse_res ->
+  Analysis.Semant.transProg parse_res

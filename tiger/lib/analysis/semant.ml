@@ -82,7 +82,7 @@ let rec transExp venv tenv (e:A.exp) : expty =
         let {exp=_;ty=var_ty} = transVar venv tenv var in
           if exp_ty = var_ty then {exp=();ty=T.UNIT}
           else (E.error pos ("Assignment type fails to match");{exp=();ty=T.UNIT})
-    | A.IfExp {test; then'; else'=None; pos} (** todo: and/or *) ->
+    | A.IfExp {test; then'; else'=None; pos} (* todo: and/or *) ->
         let {exp=_;ty=test_ty} = trexp test in
         if test_ty = T.INT then
         ( let {exp=_;ty=then_ty} = trexp then' in

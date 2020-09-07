@@ -68,6 +68,7 @@ Solution to "Modern Compiler Implementation in ML" implemented in Ocaml
   - [ ] efficient data structure for environment "adding"
   - [ ] cycle of type definitions
 
+> To Run the type checker, `cd tiger; make; dune utop`, then execute `Util.semant_check "testcases/yourtestfile.tig"` in utop to type check the tiger program
 
 ## References
 
