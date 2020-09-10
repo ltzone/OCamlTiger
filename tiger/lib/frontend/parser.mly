@@ -257,8 +257,8 @@ decs:
     { match decs_tl with
       | [] -> [ A.TypeDec [ty_dec] ]
       | hd :: tl -> match hd with
-                    | A.TypeDec ty_dec' -> A.TypeDec (ty_dec::ty_dec') :: tl
-                    | _ -> A.TypeDec [ty_dec] :: tl }
+                    | A.TypeDec ty_dec' -> (A.TypeDec (ty_dec::ty_dec')) :: tl
+                    | _ -> (A.TypeDec [ty_dec]) :: hd :: tl }
   | vdec = vardec; decs_tl = decs 
     { vdec::decs_tl }
   | fun_dec = fundec; decs_tl = decs 
@@ -266,7 +266,7 @@ decs:
       | [] -> [ A.FunctionDec [fun_dec] ]
       | hd :: tl -> match hd with
                     | A.FunctionDec fun_dec' -> A.FunctionDec (fun_dec::fun_dec') :: tl
-                    | _ -> A.FunctionDec [fun_dec] :: tl  }
+                    | _ -> A.FunctionDec [fun_dec] :: hd :: tl  }
 
 // type declarations
 tydec:

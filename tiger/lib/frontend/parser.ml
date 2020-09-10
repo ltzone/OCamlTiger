@@ -407,7 +407,7 @@ and _menhir_goto_decs : _menhir_env -> 'ttv_tail -> _menhir_state -> 'tv_decs ->
       | [] -> [ A.FunctionDec [fun_dec] ]
       | hd :: tl -> match hd with
                     | A.FunctionDec fun_dec' -> A.FunctionDec (fun_dec::fun_dec') :: tl
-                    | _ -> A.FunctionDec [fun_dec] :: tl  )
+                    | _ -> A.FunctionDec [fun_dec] :: hd :: tl  )
 # 412 "lib/frontend/parser.ml"
          in
         _menhir_goto_decs _menhir_env _menhir_stack _menhir_s _v) : 'freshtv514)) : 'freshtv516)
@@ -422,8 +422,8 @@ and _menhir_goto_decs : _menhir_env -> 'ttv_tail -> _menhir_state -> 'tv_decs ->
     ( match decs_tl with
       | [] -> [ A.TypeDec [ty_dec] ]
       | hd :: tl -> match hd with
-                    | A.TypeDec ty_dec' -> A.TypeDec (ty_dec::ty_dec') :: tl
-                    | _ -> A.TypeDec [ty_dec] :: tl )
+                    | A.TypeDec ty_dec' -> (A.TypeDec (ty_dec::ty_dec')) :: tl
+                    | _ -> (A.TypeDec [ty_dec]) :: hd :: tl )
 # 428 "lib/frontend/parser.ml"
          in
         _menhir_goto_decs _menhir_env _menhir_stack _menhir_s _v) : 'freshtv518)) : 'freshtv520)
@@ -4068,7 +4068,7 @@ and _menhir_run8 : _menhir_env -> 'ttv_tail -> _menhir_state -> Lexing.position 
         let _startpos = _startpos__1_ in
         let _v : 'tv_exp = 
 # 154 "lib/frontend/parser.mly"
-      ( A.NilExp )
+      ( A.SeqExp [] )
 # 4073 "lib/frontend/parser.ml"
          in
         _menhir_goto_exp _menhir_env _menhir_stack _menhir_s _v _startpos) : 'freshtv32)) : 'freshtv34)
