@@ -1,0 +1,95 @@
+--------test 1-------------
+--------test 2-------------
+--------test 3-------------
+--------test 4-------------
+--------test 5-------------
+--------test 6-------------
+--------test 7-------------
+--------test 8-------------
+--------test 9-------------
+:1.42:Two Branches have different type
+--------test 10-------------
+:1.36:Loop body has invalid type
+--------test 11-------------
+:1.76:illegal bounds
+--------test 12-------------
+--------test 13-------------
+:1.46:integer required
+--------test 14-------------
+:1.189:uncomparable types
+:1.186:Condition has invalid type
+--------test 15-------------
+:1.39:Branch has invalid type, expected unit
+--------test 16-------------
+:1.91:cyclic definition in c
+:1.109:cyclic definition in d
+--------test 17-------------
+:1.103:undefined type name treelist
+--------test 18-------------
+:1.115:undefined function do_nothing2
+--------test 19-------------
+:1.215:undefined variable a
+:1.203:do_nothing1 has wrong argument type
+--------test 20-------------
+:1.52:undefined variable i
+:1.52:integer required
+--------test 21-------------
+:1.152:integer required
+:1.94:Wrong Return Type of Function nfactor
+--------test 22-------------
+:1.128:nam not found in the field
+:1.128:Assignment type fails to match
+--------test 23-------------
+:1.118:Assignment type fails to match
+:1.135:Assignment type fails to match
+--------test 24-------------
+:1.51:Not an array type
+--------test 25-------------
+:1.52:f is not a valid field name
+--------test 26-------------
+:1.31:integer required
+--------test 27-------------
+--------test 28-------------
+:1.123:type rectype1 not match
+:1.178:undefined variable rec1
+--------test 29-------------
+:1.102:type arrtype1 not match
+:1.147:undefined variable arr1
+--------test 30-------------
+--------test 31-------------
+:1.57:type int not match
+:1.78:undefined variable a
+--------test 32-------------
+:1.97:invalid element type of arrayty
+:1.88:Invalid nil declaration
+--------test 33-------------
+:1.39:undefined type name rectype
+:1.39:rectype is not a record type
+:1.31:Invalid nil declaration
+--------test 34-------------
+:1.101:g has wrong argument type
+--------test 35-------------
+:1.90:g has wrong argument type
+--------test 36-------------
+:1.91:g has incorrect number of arguments
+--------test 37-------------
+--------test 38-------------
+:1.173:Same type name [a] in recursive declarations
+--------test 39-------------
+:1.191:Same function name [g] in recursive declarations
+--------test 40-------------
+:1.42:Wrong Return Type of Function g
+--------test 41-------------
+--------test 42-------------
+--------test 43-------------
+:1.87:integer required
+--------test 44-------------
+--------test 45-------------
+:1.117:Invalid nil declaration
+--------test 46-------------
+--------test 47-------------
+--------test 48-------------
+--------test 49-------------
+testcases/test49.tig:5:21: syntax error
+------test of queens--------
+------test of merge---------

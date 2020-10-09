@@ -8,14 +8,42 @@ type tenv = T.ty Ast.Symbol.table
 
 type expty = {exp: Translate.exp; ty: Types.ty}
 
+let checkDupFun fundeclis =
+  let walk_lis venv
+    ({name;params=_;result=_;body=_;pos}:A.fundec) =
+    match S.look (venv, name) with
+    | None ->  S.enter (venv,name,())
+    | Some _ -> E.error pos ("Same function name [" ^ S.name name ^ "] in recursive declarations");venv in
+  let _ = List.fold_left walk_lis S.empty fundeclis in ()
+
+let checkDupTy tydeclis =
+  let walk_lis venv
+    ({name;ty=_;pos}:A.typedec) =
+    match S.look (venv, name) with
+    | None ->  S.enter (venv,name,())
+    | Some _ -> E.error pos ("Same type name [" ^ S.name name ^ "] in recursive declarations");venv in
+  let _ = List.fold_left walk_lis S.empty tydeclis in ()
+
 let checkInt {exp;ty} pos : Translate.exp =
   let _ = exp in
     match ty with
     | T.INT -> ()
     | _ -> Errormsg.error pos "integer required"
 
+let real_type = function
+  | Some (T.NAME (_, real_ty)) ->  !real_ty
+  | other -> other
+
+let ty_cmp ty arg_ty =
+  (* T.print_ty_opt (real_type (Some ty)); *)
+  (* T.print_ty_opt (real_type (Some arg_ty)); *)
+  let res = (T.ty_check_opt (real_type (Some ty)) (real_type (Some arg_ty)) || arg_ty = T.NIL) in
+  (* (print_endline (string_of_bool res)); *)
+   res
+
 let lookType tenv ty_name pos = 
-  match S.look (tenv, ty_name) with
+  let ty = real_type (S.look (tenv, ty_name)) in
+  match ty with
   | None -> E.error pos ("undefined type name " ^ S.name ty_name);T.NIL
   | Some ty -> ty
 
@@ -27,10 +55,18 @@ let rec transExp venv tenv (e:A.exp) : expty =
     | A.IntExp _ -> {exp=(); ty=T.INT}
     | A.StringExp _ -> {exp=(); ty=T.STRING}
     | A.VarExp var -> transVar venv tenv var
-    | A.OpExp{left;oper=_;right;pos} ->
-        checkInt (trexp left) pos;
-        checkInt (trexp right) pos;
-        {exp=(); ty=T.INT}
+    | A.OpExp{left;oper;right;pos} ->
+        (match oper with
+        | EqOp | NeqOp ->
+          (let {exp=_;ty=ty1} = trexp left in
+          let {exp=_;ty=ty2} = trexp right in
+          if (ty1=ty2 || ty1 =T.NIL || ty2 = T.NIL)
+            then {exp=();ty=T.INT}
+            else (E.error pos ("uncomparable types"); {exp=();ty=T.NIL}))
+        | _ ->
+          checkInt (trexp left) pos;
+          checkInt (trexp right) pos;
+          {exp=(); ty=T.INT})
     | A.CallExp {func; args; pos} ->
         (match S.look (venv, func) with
         | None -> E.error pos ("undefined function " ^ S.name func);
@@ -43,27 +79,27 @@ let rec transExp venv tenv (e:A.exp) : expty =
                     match arg_tys, args with
                     | ty::arg_tys', arg::args'
                         -> let {exp=_;ty=arg_ty} = trexp arg in 
-                          if (ty = arg_ty) then iter_args arg_tys' args'
+                          if (ty_cmp ty arg_ty) then iter_args arg_tys' args'
                                          else E.error pos (S.name func ^ " has wrong argument type")
+                    | [], [] -> ()
                     | _ -> E.error pos (S.name func ^ " has incorrect number of arguments") in
                   iter_args formals args;
                   {exp=();ty=result}
         )
     | A.RecordExp {fields;typ=type_id;pos} ->
         (
-          match S.look (tenv, type_id) with
-          | None -> E.error pos ("undefined record type " ^ S.name type_id);
-            {exp=();ty=T.NIL}
-          | Some ty -> (match ty with
+          let ty = lookType tenv type_id pos in
+          (match ty with
             | T.RECORD (fty_list,_) -> 
                 let rec iter_field field_tys fields =
                   match field_tys, fields with
                   | (sym1,ty)::field_tys', (sym2,f,pos')::fields'
                       -> let {exp=_;ty=arg_ty} = trexp f in 
-                        if (ty = arg_ty)
+                        if (ty_cmp ty arg_ty)
                           then (if sym1=sym2 then iter_field field_tys' fields'
                           else E.error pos' ("Wrong field name of " ^ S.name sym2))
                           else E.error pos' ("Wrong field type of " ^ S.name sym2)
+                  | [], [] -> ()
                   | _ -> E.error pos ("Field number mismatches") in
                 iter_field fty_list fields;
                 {exp=();ty=ty}
@@ -72,15 +108,16 @@ let rec transExp venv tenv (e:A.exp) : expty =
         )
     | A.SeqExp [] -> {exp=();ty=T.UNIT}
     | A.SeqExp [(exp,_)] -> trexp exp
-    | A.SeqExp ((exp,pos)::seq') ->
-        let {exp=_;ty=exp_ty} = trexp exp in
-          (match exp_ty with
-          | T.UNIT -> trexp (A.SeqExp seq')
-          | _ -> E.error pos ("Expression not a unit type");{exp=();ty=T.NIL})
+    | A.SeqExp ((exp,_)::seq') ->
+        let {exp=_;ty=_} = trexp exp in
+          trexp (A.SeqExp seq')
+          (* (match exp_ty with *)
+          (* | T.UNIT -> trexp (A.SeqExp seq') *)
+          (* | _ -> E.error pos ("Expression not a unit type");{exp=();ty=T.NIL}) *)
     | A.AssignExp {var;exp;pos} ->
         let {exp=_;ty=exp_ty} = trexp exp in
         let {exp=_;ty=var_ty} = transVar venv tenv var in
-          if exp_ty = var_ty then {exp=();ty=T.UNIT}
+          if (exp_ty = var_ty || exp_ty = T.NIL) then {exp=();ty=T.UNIT}
           else (E.error pos ("Assignment type fails to match");{exp=();ty=T.UNIT})
     | A.IfExp {test; then'; else'=None; pos} (* todo: and/or *) ->
         let {exp=_;ty=test_ty} = trexp test in
@@ -96,7 +133,9 @@ let rec transExp venv tenv (e:A.exp) : expty =
         if test_ty = T.INT then
         ( let {exp=_;ty=then_ty} = trexp then' in
           let {exp=_;ty=else_ty} = trexp else' in
-          if then_ty = else_ty then {exp=();ty=then_ty}
+          (* if then_ty = else_ty  *)
+          if ty_cmp then_ty else_ty
+          then {exp=();ty=then_ty}
           else (E.error pos ("Two Branches have different type");
                 {exp=();ty=T.NIL})
         )
@@ -105,7 +144,9 @@ let rec transExp venv tenv (e:A.exp) : expty =
         let {exp=_;ty=test_ty} = trexp test in
           if test_ty = T.INT then
           ( let {exp=_;ty=body_ty} = trexp body in
-            {exp=();ty=body_ty}
+            if body_ty = T.UNIT then
+              {exp=();ty=body_ty}
+            else (E.error pos ("Loop body has invalid type");{exp=();ty=T.NIL})
           )
           else (E.error pos ("Condition has invalid type");{exp=();ty=T.NIL})
     | A.ForExp {var; escape=_; lo; hi; body; pos} ->
@@ -119,20 +160,22 @@ let rec transExp venv tenv (e:A.exp) : expty =
           | _ -> E.error pos "illegal bounds"; {exp=();ty=T.NIL})
     | A.BreakExp _ -> {exp=();ty=T.UNIT}
     | A.ArrayExp {typ; size; init; pos} ->
-        let arty = S.look (tenv,typ) in
-        (match arty with
-        | None -> E.error pos ("undefined type " ^ S.name typ);{exp=();ty=T.NIL}
-        | Some arty -> (
+        let arty = lookType tenv typ pos in (
           let {exp=_;ty=init_ty} = trexp init in
           let {exp=_;ty=size_ty} = trexp size in
           if size_ty = T.INT then
-            ( if init_ty = arty then
-              {exp=();ty=T.ARRAY (arty,ref ())}
-              else ( E.error pos ("invalid array size of " ^ S.name typ);
-                    {exp=();ty=T.NIL}))
+          match arty with
+          | T.ARRAY (elm_ty, _) -> 
+              if (real_type (Some elm_ty) = real_type (Some init_ty)) then
+               {exp=();ty=arty} 
+               (* Here we should pass the original type instead of creating a new type*)
+              else (E.error pos ("invalid element type of " ^ S.name typ);
+              {exp=();ty=T.NIL})
+          | _ -> (E.error pos (S.name typ ^ " is not an array type");
+          {exp=();ty=T.NIL})
           else ( E.error pos ("invalid array size of " ^ S.name typ);
                  {exp=();ty=T.NIL})
-        ))
+        )
     | A.LetExp {decs; body; _} ->
         let update_env (old_venv, old_tenv) dec  =
           transDec old_venv old_tenv dec in
@@ -152,11 +195,15 @@ and transVar venv tenv v: expty =
                 {exp=();ty=T.NIL})
   | A.FieldVar (var,s,pos) ->
       let {exp=_;ty=var_ty} = trvar var in
+        let var_ty = real_type (Some var_ty) in
         (match var_ty with
-        | T.RECORD (record_tys, _) ->
-           let _, field_ty = 
-            List.find (fun (record_s,_) -> s = record_s) record_tys in
-           {exp=();ty=field_ty}
+        | Some (T.RECORD (record_tys, _)) ->
+           let field_res = 
+            List.find_opt (fun (record_s,_) -> s = record_s) record_tys in
+            (match field_res with
+            | Some (_, field_ty) -> {exp=();ty=field_ty}
+            | None -> E.error pos (S.name s ^ " not found in the field");
+              {exp=();ty=T.NIL})
         | _ -> E.error pos (S.name s ^ " is not a valid field name");
                {exp=();ty=T.NIL})
   | A.SubscriptVar (var,exp,pos) -> 
@@ -164,8 +211,8 @@ and transVar venv tenv v: expty =
         (match exp_ty with
         | T.INT -> 
           ( let {exp=_;ty=var_ty} = trvar var in
-            match var_ty with
-            | T.ARRAY (a_ty, _) -> {exp=();ty=a_ty}
+            match real_type (Some var_ty) with
+            | Some (T.ARRAY (a_ty, _)) -> {exp=();ty=a_ty}
             | _ -> E.error pos ("Not an array type");
                    {exp=();ty=T.NIL})
         | _ -> E.error pos ("Not a valid integer index");
@@ -174,20 +221,21 @@ and transVar venv tenv v: expty =
 
 
 and transDec venv tenv d : venv * tenv = match d with
-  | A.VarDec {name;escape=_;typ=None;init;pos=_} ->
+  | A.VarDec {name;escape=_;typ=None;init;pos} ->
       let {exp=_;ty} = transExp venv tenv init in
-      (S.enter (venv, name, Env.VarEntry {ty=ty}), tenv)
+      (match ty with
+      | T.NIL -> E.error pos ("Invalid nil declaration")
+      | _ -> ());(S.enter (venv, name, Env.VarEntry {ty=ty}), tenv)
   | A.VarDec {name;escape=_;typ=Some (ty_name,ty_pos);init;pos=_} ->
       let {exp=_;ty} = transExp venv tenv init in
-      (match (S.look (tenv, ty_name)) with
-      | None -> E.error ty_pos ("undefined type name "^ S.name ty_name);
-                (venv,tenv)
-      | Some ty' -> if ty = ty' 
-            then (S.enter (venv, name, Env.VarEntry {ty=ty}), tenv)
+      let ty' = lookType tenv ty_name ty_pos in
+          if (ty == ty' || ty = T.NIL)
+            then (S.enter (venv, name, Env.VarEntry {ty=ty'}), tenv)
             else (E.error ty_pos ("type "^ S.name ty_name ^ " not match");
-            (venv,tenv)))
+            (venv,tenv))
   | A.TypeDec tydeclis ->
-      let mkheader tenv ({name;ty=_;pos=_}:A.typedec) =
+      let () = checkDupTy tydeclis in
+      let mkheader tenv ({name;ty=_;pos=_}:A.typedec) = 
         S.enter(tenv,name,T.NAME(name, ref None)) in
       let tenv' = List.fold_left mkheader tenv tydeclis in
       let trTy ({name;ty=ty_exp;pos=_}:A.typedec) = 
@@ -198,8 +246,17 @@ and transDec venv tenv d : venv * tenv = match d with
               Some ty_res )
         | _ -> assert false (* impossible *) in
       List.iter trTy tydeclis;(venv,tenv')
+      (* let actual_ty old_tenv ({name;ty=_;pos=_}:A.typedec) =
+         match S.look (tenv', name) with
+         | Some (T.NAME (_, real_ty)) -> 
+              (match !real_ty with
+              | Some real_ty ->  S.enter (old_tenv, name, real_ty)
+              | None -> assert false )
+         | _ -> old_tenv in      
+      (venv,List.fold_left actual_ty tenv tydeclis) *)
   | A.FunctionDec fundeclis ->
       (* gather information about the header of each function*)
+      let () = checkDupFun fundeclis in
       let find_formal_type
         ({name=_;escape=_;typ=param_typ;pos}:A.field) = 
           lookType tenv param_typ pos in
@@ -209,7 +266,7 @@ and transDec venv tenv d : venv * tenv = match d with
         let result = match result with
           | None -> T.UNIT
           | Some (ty,pos) -> lookType tenv ty pos in
-        S.enter (venv,name,Env.FunEntry{formals=formals;result=result}) in
+               S.enter (venv,name,Env.FunEntry{formals=formals;result=result}) in
       let venv' = List.fold_left mkheader_sig venv fundeclis in
 
       (* process each function body *)
@@ -222,7 +279,7 @@ and transDec venv tenv d : venv * tenv = match d with
         let result = match result with
           | None -> T.UNIT
           | Some (ty,pos) -> lookType tenv ty pos in
-        if ret_ty = result then ()
+        if ty_cmp ret_ty result then ()
         else E.error pos ("Wrong Return Type of Function "^ S.name name)
       in
 

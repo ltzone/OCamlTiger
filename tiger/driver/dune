@@ -1,3 +1,7 @@
-(library
- (name util)
+; (library
+;  (name util)
+;  (libraries core frontend ast analysis))
+
+(executable
+ (name semant_util)
  (libraries core frontend ast analysis))

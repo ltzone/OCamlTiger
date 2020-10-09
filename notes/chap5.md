@@ -1,7 +1,7 @@
 ---
 title: 【OCaml Tiger】Chapter 5 Semantic Actions
 url: ml-semantic
-date: 2020-08-20 15:04:09
+date: 2020-10-09 15:04:09
 tags: 
 - Modern Compiler Implementation in OCaml
 
@@ -135,10 +135,13 @@ type ty =
 
 ## Implementation
 
+Basically following the instructions on the textbook.
 
-### Type-Checking Expressions
+### Lessons to learn
 
-
-
-### Type-Checking Declarations
-
+- How to judge two types are equivalent are important!
+  - make use of the `unit ref` in array and record definitions
+  - abstract the `ty_cmp` function for convenience of debugging and deal with `T.NIL` uniformly
+- Things that are less notably specified in the textbook
+  - Though same-name bindings are allowed, You should check duplicate signatures in case of recursive definitions
+- Patience!

@@ -55,20 +55,20 @@ Solution to "Modern Compiler Implementation in ML" implemented in Ocaml
 ### Chapter 5 Semantic Actions
 - [x] Reading
   - [x] [Foundation Notes](https://www.ltzhou.com/ml-semantic/) (*Aug 27th, 2020*)
-  - [ ] Implementation Notes
+  - [x] [Implementation Notes](https://www.ltzhou.com/ml-semantic) (*Oct 9th, 2020*)
 - [x] Programming Part A: (*Sept 2nd, 2020*)
   - [x] [Simple Type Checker](tiger/lib/analysis/semant.ml) (*Aug 31st, 2020*)
   - [x] [Declaration Processor](tiger/lib/analysis/semant.ml) (*Sept 2nd, 2020*)
 - [ ] Programming Part B:
   - [x] [Handle (Mutually) Recursive Functions, Types Declarations](tiger/lib/analysis/semant.ml) (*Sept 2nd, 2020*)
   - [ ] Correct Nesting of break statements
-  - [ ] Driver and TestCases
+  - [x] [Driver](tiger/driver/semant_util.ml) and [TestCases](tiger/testcases/semant_output.txt) (*Oct 9th, 2020*)
 - [ ] Exercises
   - [ ] Improve HashTable Implementation
   - [ ] efficient data structure for environment "adding"
   - [ ] cycle of type definitions
 
-> To Run the type checker, `cd tiger; make; dune utop`, then execute `Util.semant_check "testcases/yourtestfile.tig"` in utop to type check the tiger program
+> To Run the type checker, modify the `dune` file in `/driver`, then execute `dune exec driver/semant_util.exe` in shell to type check all the tiger programs
 
 ## References
 

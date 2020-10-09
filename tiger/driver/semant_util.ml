@@ -28,6 +28,18 @@ let parse_file filename =
 let semant_check filename =
   let parse_res = parse_file filename in
   match parse_res with
-  | None -> assert false
+  | None -> ()
   | Some parse_res ->
   Analysis.Semant.transProg parse_res
+
+let () = 
+  (for i = 1 to 49 do
+    print_string "--------test ";
+    print_string (string_of_int i);
+    print_endline "-------------";
+    semant_check ("testcases/src_test/test"^(string_of_int i)^".tig")
+  done);
+  print_endline "------test of queens--------";
+  semant_check ("testcases/queens.tig");
+  print_endline "------test of merge---------";
+  semant_check ("testcases/merge.tig");
