@@ -31,3 +31,4 @@ playground/*
 reference/*
 .vscode/*
 tiger/testcases/foo.tig
+.DS_Store
