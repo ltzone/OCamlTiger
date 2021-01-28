@@ -36,8 +36,8 @@ let semant_check filename =
   | Some parse_res ->
   Analysis.Semant.transProg parse_res
 
-let () = 
-  (for i = 1 to 49 do
+let run_test _ = 
+  let _ = (for i = 1 to 49 do
     print_string "--------test ";
     print_string (string_of_int i);
     print_endline "-------------";
@@ -47,4 +47,6 @@ let () =
   print_endline "------test of queens--------";
   semant_check ("testcases/queens.tig");
   print_endline "------test of merge---------";
-  semant_check ("testcases/merge.tig")
+  semant_check ("testcases/merge.tig") in ()
+
+let () = ()

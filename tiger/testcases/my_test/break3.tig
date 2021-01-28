@@ -1,0 +1,7 @@
+/* a correct break program */
+
+let
+	var a:= 0
+in 
+	while (1) do (a:=a+1; if a > 20 then break)
+end

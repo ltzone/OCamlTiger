@@ -8,6 +8,8 @@ type tenv = T.ty Ast.Symbol.table
 
 type expty = {exp: Translate.exp; ty: Types.ty}
 
+type loopenv = IsLoop
+
 let checkDupFun fundeclis =
   let walk_lis venv
     ({name;params=_;result=_;body=_;pos}:A.fundec) =
@@ -47,10 +49,9 @@ let lookType tenv ty_name pos =
   | None -> E.error pos ("undefined type name " ^ S.name ty_name);T.NIL
   | Some ty -> ty
 
-let rec transExp venv tenv (e:A.exp) : expty =
-  let _ = venv in
-  let _ = tenv in
+let rec transExp venv tenv ?(isloop:loopenv option) (e:A.exp) : expty =
   let rec trexp = function
+  (* a quick function to traverse exp within same env *)
     | A.NilExp -> {exp=(); ty=T.NIL}
     | A.IntExp _ -> {exp=(); ty=T.INT}
     | A.StringExp _ -> {exp=(); ty=T.STRING}
@@ -143,7 +144,7 @@ let rec transExp venv tenv (e:A.exp) : expty =
     | A.WhileExp {test; body; pos} ->
         let {exp=_;ty=test_ty} = trexp test in
           if test_ty = T.INT then
-          ( let {exp=_;ty=body_ty} = trexp body in
+          ( let {exp=_;ty=body_ty} = transExp venv tenv ~isloop:IsLoop body in
             if body_ty = T.UNIT then
               {exp=();ty=body_ty}
             else (E.error pos ("Loop body has invalid type");{exp=();ty=T.NIL})
@@ -155,10 +156,12 @@ let rec transExp venv tenv (e:A.exp) : expty =
           (match lo_ty, hi_ty with
           | T.INT, T.INT -> 
               let {exp=_;ty=body_ty} =
-                transExp (S.enter (venv,var,VarEntry {ty=T.INT})) tenv body in
+                transExp (S.enter (venv,var,VarEntry {ty=T.INT})) tenv ~isloop:IsLoop body in
               {exp=();ty=body_ty}
           | _ -> E.error pos "illegal bounds"; {exp=();ty=T.NIL})
-    | A.BreakExp _ -> {exp=();ty=T.UNIT}
+    | A.BreakExp pos -> (match isloop with
+                        | Some IsLoop -> {exp=();ty=T.UNIT}
+                        | None -> E.error pos "illegal break"; {exp=();ty=T.NIL})
     | A.ArrayExp {typ; size; init; pos} ->
         let arty = lookType tenv typ pos in (
           let {exp=_;ty=init_ty} = trexp init in

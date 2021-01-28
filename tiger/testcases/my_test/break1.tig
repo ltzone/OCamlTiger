@@ -1,0 +1,9 @@
+/* a correct break program */
+
+let
+	var a:= 0
+in 
+	for i:=0 to 100 do (a:=a+1;
+        if (a > 200) then break; ()
+    )
+end
