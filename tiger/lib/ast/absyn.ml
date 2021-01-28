@@ -1,4 +1,4 @@
-type pos = int
+type pos = Lexing.position
 and symbol = Symbol.symbol
 
 type oper = PlusOp | MinusOp | TimesOp | DivideOp

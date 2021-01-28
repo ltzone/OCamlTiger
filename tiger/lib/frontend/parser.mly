@@ -37,104 +37,104 @@ exp_basic:
   | v = lvalue { A.VarExp v }
   | NIL { A.NilExp }
   | i = INT { A.IntExp i }
-  | str = STRING { A.StringExp (str, $startofs) }
+  | str = STRING { A.StringExp (str, $startpos) }
   | MINUS; e = exp_basic 
       { A.OpExp {
           left= IntExp 0;
           oper= MinusOp;
           right= e;
-          pos= $startofs
+          pos= $startpos
       } } %prec UMINUS
   | e1 = exp_basic ; PLUS ; e2 = exp_basic
       { A.OpExp {
           left= e1;
           oper= PlusOp;
           right= e2;
-          pos= $startofs
+          pos= $startpos
       } }
   | e1 = exp_basic ; MINUS ; e2 = exp_basic
       { A.OpExp {
           left= e1;
           oper= MinusOp;
           right= e2;
-          pos= $startofs
+          pos= $startpos
       } }
   | e1 = exp_basic ; TIMES ; e2 = exp_basic
       { A.OpExp {
           left= e1;
           oper= TimesOp;
           right= e2;
-          pos= $startofs
+          pos= $startpos
       } }
   | e1 = exp_basic ; DIVIDE ; e2 = exp_basic
       { A.OpExp {
           left= e1;
           oper= DivideOp;
           right= e2;
-          pos= $startofs
+          pos= $startpos
       } }
   | e1 = exp_basic ; EQ ; e2 = exp_basic
       { A.OpExp {
           left= e1;
           oper= EqOp;
           right= e2;
-          pos= $startofs
+          pos= $startpos
       } }
   | e1 = exp_basic ; NEQ ; e2 = exp_basic
       { A.OpExp {
           left= e1;
           oper= NeqOp;
           right= e2;
-          pos= $startofs
+          pos= $startpos
       } }
   | e1 = exp_basic ; LT ; e2 = exp_basic
       { A.OpExp {
           left= e1;
           oper= LtOp;
           right= e2;
-          pos= $startofs
+          pos= $startpos
       } }
   | e1 = exp_basic ; GT ; e2 = exp_basic
       { A.OpExp {
           left= e1;
           oper= GtOp;
           right= e2;
-          pos= $startofs
+          pos= $startpos
       } }
   | e1 = exp_basic ; LE ; e2 = exp_basic
       { A.OpExp {
           left= e1;
           oper= LeOp;
           right= e2;
-          pos= $startofs
+          pos= $startpos
       } }
   | e1 = exp_basic ; GE ; e2 = exp_basic
       { A.OpExp {
           left= e1;
           oper= GeOp;
           right= e2;
-          pos= $startofs
+          pos= $startpos
       } }
   | e1 = exp_basic ; OR ; e2 = exp_basic
       { A.IfExp {
           test= e1;
           then'= IntExp 1;
           else'= Some e2;
-          pos= $startofs
+          pos= $startpos
       } }
   | e1 = exp_basic ; AND ; e2 = exp_basic
       { A.IfExp {
           test= e1;
           then'= e2;
           else'= Some (IntExp 0);
-          pos= $startofs
+          pos= $startpos
       } }
   | fun_id = ID; LPAREN; exps = separated_list(COMMA, exp);RPAREN 
       {
         A.CallExp {
           func= S.symbol fun_id;
           args= exps;
-          pos= $startofs
+          pos= $startpos
         }
       }
 
@@ -145,7 +145,7 @@ exp:
         A.AssignExp {
           var= v;
           exp= e;
-          pos= $startofs
+          pos= $startpos
         }
       }
   | LPAREN ; elis = expseq ; RPAREN
@@ -158,7 +158,7 @@ exp:
           test= e1;
           then'= e2;
           else'= Some e3;
-          pos= $startofs
+          pos= $startpos
         }
       }
   | IF; e1 = exp; THEN; e2 = exp
@@ -167,7 +167,7 @@ exp:
           test= e1;
           then'= e2;
           else'= None;
-          pos= $startofs
+          pos= $startpos
         }
       }
   | WHILE; e1 = exp; DO; e2 = exp
@@ -175,7 +175,7 @@ exp:
         A.WhileExp {
           test= e1;
           body= e2;
-          pos= $startofs
+          pos= $startpos
         }
       }
   | FOR; iter_id = ID; ASSIGN; e1 = exp; TO; e2 = exp; DO; e3 = exp
@@ -186,16 +186,16 @@ exp:
           lo= e1;
           hi= e2;
           body= e3;
-          pos= $startofs
+          pos= $startpos
         }
       }
-  | BREAK {(A.BreakExp ($startofs))}
+  | BREAK {(A.BreakExp ($startpos))}
   | LET; dec_lis = decs; IN; exps = expseq; END
       {
         A.LetExp {
           decs= dec_lis;
           body= exps;
-          pos= $startofs
+          pos= $startpos
         }
       }
   | type_id = ID ; LBRACK; exp1 = exp; RBRACK; OF; exp2 = exp
@@ -204,47 +204,47 @@ exp:
           typ= (S.symbol type_id); 
           size= exp1; 
           init= exp2; 
-          pos= $startofs }
+          pos= $startpos }
       }
   | type_id = ID ; LBRACE; rec_fields = separated_list(COMMA, exp_field);  RBRACE
       {
         A.RecordExp {
           fields= rec_fields;
           typ= S.symbol type_id;
-          pos= $startofs
+          pos= $startpos
         }
       }
 
 %inline exp_field:
 | field_id = ID; EQ; exp1 = exp
   {
-    (S.symbol field_id, exp1, $startofs )
+    (S.symbol field_id, exp1, $startpos )
   }
 
 lvalue:
   | i = ID           
-      { A.SimpleVar (S.symbol i, $startofs) }
+      { A.SimpleVar (S.symbol i, $startpos) }
   | i = lvalue_t
       { i }
 
 lvalue_t: // <--- How shift/reduce conflict mentioned on Page 82 is resolved 
   | v = ID ; LBRACK; e = exp; RBRACK
-      { A.SubscriptVar (A.SimpleVar (S.symbol v, $startofs),
-                        e, $startofs)}
+      { A.SubscriptVar (A.SimpleVar (S.symbol v, $startpos),
+                        e, $startpos)}
   | v = lvalue_t ; LBRACK; e = exp; RBRACK
-      { A.SubscriptVar (v, e, $startofs)}
+      { A.SubscriptVar (v, e, $startpos)}
   | v = ID ; DOT; i = ID
-      { (A.FieldVar (A.SimpleVar (S.symbol v, $startofs),
-                     S.symbol i, $startofs)) }
+      { (A.FieldVar (A.SimpleVar (S.symbol v, $startpos),
+                     S.symbol i, $startpos)) }
   | v = lvalue_t ; DOT; i = ID
-      { (A.FieldVar (v, S.symbol i, $startofs)) }
+      { (A.FieldVar (v, S.symbol i, $startpos)) }
 
 expseq:
   | e = exp
-    { A.SeqExp [(e, $startofs)] }
+    { A.SeqExp [(e, $startpos)] }
   | e1 = exp SEMICOLON exps = expseq 
     { match exps with
-      | A.SeqExp es -> A.SeqExp ((e1,$startofs)::es)
+      | A.SeqExp es -> A.SeqExp ((e1,$startpos)::es)
       | _ -> assert false (* impossible expseq *)
     }
   // | exps = separated_list(SEMICOLON, exp) {}
@@ -275,17 +275,17 @@ tydec:
         {
           name= S.symbol type_id;
           ty= type_def;
-          pos= $startofs;
+          pos= $startpos;
         }
       }
 
 ty:
   | type_id = ID
-      { A.NameTy (S.symbol type_id, $startofs ) }
+      { A.NameTy (S.symbol type_id, $startpos ) }
   | LBRACE; type_fields = separated_list(COMMA, tyfield) ;RBRACE
       { A.RecordTy (type_fields) }
   | ARRAY; OF; type_id = ID
-      { A.ArrayTy (S.symbol type_id, $startofs )}
+      { A.ArrayTy (S.symbol type_id, $startpos )}
 
 tyfield:
   | field_id = ID; COLON ; type_id = ID
@@ -294,7 +294,7 @@ tyfield:
           name= S.symbol field_id;
           escape= true;
           typ= S.symbol type_id;
-          pos= $startofs
+          pos= $startpos
         })
       }
 
@@ -305,9 +305,9 @@ vardec:
       A.VarDec {
         name= S.symbol var_id;
         escape= true;
-        typ= Some (S.symbol type_id, $startofs);
+        typ= Some (S.symbol type_id, $startpos);
         init= e;
-        pos= $startofs;
+        pos= $startpos;
       }
     }
   | VAR ; var_id = ID; ASSIGN ; e = exp
@@ -317,7 +317,7 @@ vardec:
         escape= true;
         typ= None;
         init= e;
-        pos= $startofs
+        pos= $startpos
       }
     }
 
@@ -330,7 +330,7 @@ fundec:
         params= (type_fields);
         result= None;
         body= e;
-        pos= $startofs
+        pos= $startpos
       }
     }
   | FUNCTION ; fun_id = ID ; LPAREN; type_fields = separated_list(COMMA, tyfield); RPAREN ; COLON ; type_id = ID ; EQ ; e = exp
@@ -338,8 +338,8 @@ fundec:
       {
         name= S.symbol fun_id;
         params= (type_fields);
-        result= Some (S.symbol type_id, $startofs);
+        result= Some (S.symbol type_id, $startpos);
         body= e;
-        pos= $startofs
+        pos= $startpos
       }
     }

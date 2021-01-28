@@ -7,89 +7,88 @@
 --------test 7-------------
 --------test 8-------------
 --------test 9-------------
-:1.42:Two Branches have different type
+testcases/src_test/test9.tig:3:0:Two Branches have different type
 --------test 10-------------
-:1.36:Loop body has invalid type
+testcases/src_test/test10.tig:2:0:Loop body has invalid type
 --------test 11-------------
-:1.76:illegal bounds
+testcases/src_test/test11.tig:2:0:illegal bounds
 --------test 12-------------
 --------test 13-------------
-:1.46:integer required
+testcases/src_test/test13.tig:3:0:integer required
 --------test 14-------------
-:1.189:uncomparable types
-:1.186:Condition has invalid type
+testcases/src_test/test14.tig:12:4:uncomparable types
+testcases/src_test/test14.tig:12:1:Condition has invalid type
 --------test 15-------------
-:1.39:Branch has invalid type, expected unit
+testcases/src_test/test15.tig:3:0:Branch has invalid type, expected unit
 --------test 16-------------
-:1.91:cyclic definition in c
-:1.109:cyclic definition in d
+testcases/src_test/test16.tig:4:7:cyclic definition in c
+testcases/src_test/test16.tig:6:7:cyclic definition in d
 --------test 17-------------
-:1.103:undefined type name treelist
+testcases/src_test/test17.tig:4:22:undefined type name treelist
 --------test 18-------------
-:1.115:undefined function do_nothing2
+testcases/src_test/test18.tig:5:3:undefined function do_nothing2
 --------test 19-------------
-:1.215:undefined variable a
-:1.203:do_nothing1 has wrong argument type
+testcases/src_test/test19.tig:8:15:undefined variable a
 --------test 20-------------
-:1.52:undefined variable i
-:1.52:integer required
+testcases/src_test/test20.tig:3:17:undefined variable i
+testcases/src_test/test20.tig:3:17:integer required
 --------test 21-------------
-:1.152:integer required
-:1.94:Wrong Return Type of Function nfactor
+testcases/src_test/test21.tig:8:8:integer required
+testcases/src_test/test21.tig:5:0:Wrong Return Type of Function nfactor
 --------test 22-------------
-:1.128:nam not found in the field
-:1.128:Assignment type fails to match
+testcases/src_test/test22.tig:7:1:nam not found in the field
+testcases/src_test/test22.tig:7:1:Assignment type fails to match
 --------test 23-------------
-:1.118:Assignment type fails to match
-:1.135:Assignment type fails to match
+testcases/src_test/test23.tig:7:1:Assignment type fails to match
+testcases/src_test/test23.tig:8:1:Assignment type fails to match
 --------test 24-------------
-:1.51:Not an array type
+testcases/src_test/test24.tig:5:1:Not an array type
 --------test 25-------------
-:1.52:f is not a valid field name
+testcases/src_test/test25.tig:5:1:f is not a valid field name
 --------test 26-------------
-:1.31:integer required
+testcases/src_test/test26.tig:3:0:integer required
 --------test 27-------------
 --------test 28-------------
-:1.123:type rectype1 not match
-:1.178:undefined variable rec1
+testcases/src_test/test28.tig:7:1:type rectype1 not match
+testcases/src_test/test28.tig:9:1:undefined variable rec1
 --------test 29-------------
-:1.102:type arrtype1 not match
-:1.147:undefined variable arr1
+testcases/src_test/test29.tig:7:1:type arrtype1 not match
+testcases/src_test/test29.tig:9:1:undefined variable arr1
 --------test 30-------------
 --------test 31-------------
-:1.57:type int not match
-:1.78:undefined variable a
+testcases/src_test/test31.tig:3:1:type int not match
+testcases/src_test/test31.tig:5:1:undefined variable a
 --------test 32-------------
-:1.97:invalid element type of arrayty
-:1.88:Invalid nil declaration
+testcases/src_test/test32.tig:6:10:invalid element type of arrayty
+testcases/src_test/test32.tig:6:1:Invalid nil declaration
 --------test 33-------------
-:1.39:undefined type name rectype
-:1.39:rectype is not a record type
-:1.31:Invalid nil declaration
+testcases/src_test/test33.tig:3:9:undefined type name rectype
+testcases/src_test/test33.tig:3:9:rectype is not a record type
+testcases/src_test/test33.tig:3:1:Invalid nil declaration
 --------test 34-------------
-:1.101:g has wrong argument type
+testcases/src_test/test34.tig:5:1:g has wrong argument type
 --------test 35-------------
-:1.90:g has wrong argument type
+testcases/src_test/test35.tig:5:1:g has wrong argument type
 --------test 36-------------
-:1.91:g has incorrect number of arguments
+testcases/src_test/test36.tig:5:1:g has incorrect number of arguments
 --------test 37-------------
 --------test 38-------------
-:1.173:Same type name [a] in recursive declarations
+testcases/src_test/test38.tig:4:1:Same type name [a] in recursive declarations
 --------test 39-------------
-:1.191:Same function name [g] in recursive declarations
+testcases/src_test/test39.tig:4:1:Same function name [g] in recursive declarations
 --------test 40-------------
-:1.42:Wrong Return Type of Function g
+testcases/src_test/test40.tig:3:1:Wrong Return Type of Function g
 --------test 41-------------
 --------test 42-------------
 --------test 43-------------
-:1.87:integer required
+testcases/src_test/test43.tig:6:1:integer required
 --------test 44-------------
 --------test 45-------------
-:1.117:Invalid nil declaration
+testcases/src_test/test45.tig:5:1:Invalid nil declaration
 --------test 46-------------
 --------test 47-------------
 --------test 48-------------
 --------test 49-------------
-testcases/test49.tig:5:21: syntax error
+testcases/src_test/test49.tig:5:21:parse syntax error
 ------test of queens--------
 ------test of merge---------
