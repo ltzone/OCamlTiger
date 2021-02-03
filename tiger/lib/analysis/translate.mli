@@ -1,7 +1,23 @@
-type exp = unit
+(** Translate module serves the second layer of abstraction between
+    in semantic analysis phase.
+
+    +--------------------------+
+    |           Semant         |
+    +--------------------------+
+              TRANSLATE
+    +--------------------------+
+    |         Translate        | <----- This module
+    +--------------------------+
+      FRAME              TEMP
+    +-------+          +-------+
+    |       |          |       | # Dependent on Target Machine
+    | Frame |          | Temp  | # Might as well _independent_ of
+    +-------+          +-------+ # the frontend language design
+     
+*)
 
 
-type level = unit
+type level
 (** To describe a FunEntry during semantic analysis
 
     will be returned to Semant Module, in order to be kept
@@ -11,7 +27,7 @@ type level = unit
 *)
 
 
-type access = unit
+type access
 (** To describe a VarEntry during semantic analysis
 
     Note: this type declaration is not the same as Frame.access 
@@ -22,17 +38,14 @@ type access = unit
     level
 *)
 
-let outermost =  ()
+val outermost: level
 (** all "library" functions will be declared at this level, which does
     not contain a frame or formal parameter list
 *)
 
 
-let newLevel  (parent:level) (name: Temp.label) (formals:bool list): level =
-  let _ = parent in
-  let _ = name in
-  let _ = formals in
-  ()
+val newLevel : level (* parent *) -> Temp.label (* name *) 
+                -> bool list (* formals *) -> level
 (** will be called by transDec in the semantic analysis phase,
     a new 'nesting level' for each function will be created.
 
@@ -44,15 +57,11 @@ let newLevel  (parent:level) (name: Temp.label) (formals:bool list): level =
     formals list and pass that to [Frame.newFrame].
 *)
 
-let formals (lv:level) : access list =
-  let _ = lv in []
+val formals : level -> access list
 (** gain the access values (i.e. offsets) for a level's formal parameters *)
 
 
-let allocLocal (lv:level) (escape:bool) : access =
-  let _ = lv in
-  let _ = escape in
-   ()
+val allocLocal : level -> bool -> access
 (** will be called when Semant processes a local variable declaration
     
     This function will need the level information and know whether 
@@ -63,3 +72,6 @@ let allocLocal (lv:level) (escape:bool) : access =
     declared variable, in order to generate the machine code to access
     this variable
 *)
+
+
+type exp = unit (* for temp use *)

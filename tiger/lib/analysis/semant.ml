@@ -323,6 +323,35 @@ and transTy tenv t : expty = match t with
 
 
 
-let transProg  (e:Ast.Absyn.exp): unit = 
+
+module FindEscape = struct
+  (* type depth = int
+  type escEnv = (depth * bool ref) S.table
+
+  let traverseVar (env:escEnv) (d:depth) (s:A.var) : unit =
+    ()
+
+  and traverseExp (env:escEnv) (d:depth) (s:A.exp) : unit =
+    ()
+
+  and traverseDecs (env:escEnv) (d:depth) (s: A.dec list) : escEnv =
+    S.empty 
+    
+  TODO: to keep things simple, we currently assume that all parameters will be escaped
+    
+  *)
+  
+
+  let findEscape (prog: A.exp) : unit =
+    let _ = prog in
+    ()
+end
+
+
+let transProg  (e:A.exp): unit =
+  let _ = FindEscape.findEscape e in 
+  (* pre-process the AST, make sure that the "escape" label 
+    is correctly set for every parameter *)
+
   let {exp=_;ty=_} = transExp Env.base_venv Env.base_tenv e in
     ()

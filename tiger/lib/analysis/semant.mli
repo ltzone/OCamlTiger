@@ -4,3 +4,8 @@ type tenv = Types.ty Ast.Symbol.table
 type expty = {exp: Translate.exp; ty: Types.ty}
 
 val transProg: Ast.Absyn.exp -> unit 
+
+
+module FindEscape : sig
+  val findEscape : Ast.Absyn.exp -> unit
+end
