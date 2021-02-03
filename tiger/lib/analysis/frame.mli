@@ -16,6 +16,8 @@ module type AbstractFrame = sig
          type access = InFrame of int | InReg of Temp.temp
    
    *)
+
+   val outermost_frame : frame
    
    
    val newFrame :  Temp.label (* names *) -> bool list (* formals *) -> frame 

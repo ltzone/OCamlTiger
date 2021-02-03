@@ -1,17 +1,20 @@
+module FR = Frame.MIPSFrame
+(** Choose the Frame of the target machine here *)
+
 type exp = unit
 
 
-type level = unit
+type level = {frame : FR.frame; parent: level option } (* TODO not sure this is enough *)
 (** To describe a FunEntry during semantic analysis
 
     will be returned to Semant Module, in order to be kept
     in the FunEntry data structure for the function, so that
-    when it comes to across a function call, it can pass the 
+    when it comes across a function call, it can pass the 
     called function's level back to Translate.
 *)
 
 
-type access = unit
+type access = level * FR.access
 (** To describe a VarEntry during semantic analysis
 
     Note: this type declaration is not the same as Frame.access 
@@ -22,40 +25,33 @@ type access = unit
     level
 *)
 
-let outermost =  ()
+let outermost : level =  {frame=FR.outermost_frame; parent=None}
 (** all "library" functions will be declared at this level, which does
     not contain a frame or formal parameter list
 *)
 
 
 let newLevel  (parent:level) (name: Temp.label) (formals:bool list): level =
-  let _ = parent in
-  let _ = name in
-  let _ = formals in
-  ()
+  let new_frame = FR.newFrame name (true::formals) in
+      (* an extra parameter [true] is passed to the [newFrame] function so
+         so that fp will point to the static link of the current frame *)
+  { frame= new_frame; parent= Some parent}
 (** will be called by transDec in the semantic analysis phase,
-    a new 'nesting level' for each function will be created.
-
-    This function will call [Frame.newFrame] function to make a new frame
-
-    Note, for Tiger language that needs static links, since Frame
-    design should be independent of language features, this should be
-    handled in this module. We can add an extra parameter [true] to the
-    formals list and pass that to [Frame.newFrame].
-*)
+    a new 'nesting level' for each function will be created. *)
 
 let formals (lv:level) : access list =
-  let _ = lv in []
+  let frame_formals = FR.formals lv.frame in
+  let current_formals = List.tl frame_formals in
+  let append_lv acc = (lv, acc) in
+  List.map append_lv current_formals
 (** gain the access values (i.e. offsets) for a level's formal parameters *)
 
 
 let allocLocal (lv:level) (escape:bool) : access =
-  let _ = lv in
-  let _ = escape in
-   ()
+  (lv, FR.allocLocal lv.frame escape)
 (** will be called when Semant processes a local variable declaration
     
-    This function will need the level information and know whether 
+    This function will need the level information and also know whether 
     the variable in question should be escaped.
 
     An Translate.access will be returned, so that Semant can hand this
