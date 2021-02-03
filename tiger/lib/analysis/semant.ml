@@ -2,6 +2,8 @@ module A = Ast.Absyn;;
 module T = Types;;
 module S = Ast.Symbol;;
 module E = Errormsg;;
+module TS = Translate;;
+module TP = Temp;;
 
 type venv = Env.enventry Ast.Symbol.table
 type tenv = T.ty Ast.Symbol.table
@@ -49,13 +51,13 @@ let lookType tenv ty_name pos =
   | None -> E.error pos ("undefined type name " ^ S.name ty_name);T.NIL
   | Some ty -> ty
 
-let rec transExp venv tenv ?(isloop:loopenv option) (e:A.exp) : expty =
+let rec transExp (lv:TS.level) venv tenv ?(isloop:loopenv option) (e:A.exp) : expty =
   let rec trexp = function
   (* a quick function to traverse exp within same env *)
     | A.NilExp -> {exp=(); ty=T.NIL}
     | A.IntExp _ -> {exp=(); ty=T.INT}
     | A.StringExp _ -> {exp=(); ty=T.STRING}
-    | A.VarExp var -> transVar venv tenv var
+    | A.VarExp var -> transVar lv venv tenv var
     | A.OpExp{left;oper;right;pos} ->
         (match oper with
         | EqOp | NeqOp ->
@@ -72,10 +74,10 @@ let rec transExp venv tenv ?(isloop:loopenv option) (e:A.exp) : expty =
         (match S.look (venv, func) with
         | None -> E.error pos ("undefined function " ^ S.name func);
                   {exp=();ty=T.NIL}
-        | Some (Env.VarEntry {ty=_}) -> 
+        | Some (Env.VarEntry {ty=_; access=_}) -> 
                   E.error pos (S.name func ^ " is not a function");
                   {exp=();ty=T.NIL}
-        | Some (Env.FunEntry {formals; result}) ->
+        | Some (Env.FunEntry {formals; result; level=_; label=_}) ->
                   let rec iter_args (arg_tys:T.ty list) (args:A.exp list) =
                     match arg_tys, args with
                     | ty::arg_tys', arg::args'
@@ -117,7 +119,7 @@ let rec transExp venv tenv ?(isloop:loopenv option) (e:A.exp) : expty =
           (* | _ -> E.error pos ("Expression not a unit type");{exp=();ty=T.NIL}) *)
     | A.AssignExp {var;exp;pos} ->
         let {exp=_;ty=exp_ty} = trexp exp in
-        let {exp=_;ty=var_ty} = transVar venv tenv var in
+        let {exp=_;ty=var_ty} = transVar lv venv tenv var in
           if (exp_ty = var_ty || exp_ty = T.NIL) then {exp=();ty=T.UNIT}
           else (E.error pos ("Assignment type fails to match");{exp=();ty=T.UNIT})
     | A.IfExp {test; then'; else'=None; pos} (* todo: and/or *) ->
@@ -144,19 +146,21 @@ let rec transExp venv tenv ?(isloop:loopenv option) (e:A.exp) : expty =
     | A.WhileExp {test; body; pos} ->
         let {exp=_;ty=test_ty} = trexp test in
           if test_ty = T.INT then
-          ( let {exp=_;ty=body_ty} = transExp venv tenv ~isloop:IsLoop body in
+          ( let {exp=_;ty=body_ty} = transExp lv venv tenv ~isloop:IsLoop body in
             if body_ty = T.UNIT then
               {exp=();ty=body_ty}
             else (E.error pos ("Loop body has invalid type");{exp=();ty=T.NIL})
           )
           else (E.error pos ("Condition has invalid type");{exp=();ty=T.NIL})
-    | A.ForExp {var; escape=_; lo; hi; body; pos} ->
+    | A.ForExp {var; escape; lo; hi; body; pos} ->
         let {exp=_;ty=lo_ty} = trexp lo in
         let {exp=_;ty=hi_ty} = trexp hi in
           (match lo_ty, hi_ty with
           | T.INT, T.INT -> 
               let {exp=_;ty=body_ty} =
-                transExp (S.enter (venv,var,VarEntry {ty=T.INT})) tenv ~isloop:IsLoop body in
+                transExp lv
+                  (S.enter (venv,var,VarEntry {ty=T.INT;access=TS.allocLocal lv escape})) 
+                  tenv ~isloop:IsLoop body in
               {exp=();ty=body_ty}
           | _ -> E.error pos "illegal bounds"; {exp=();ty=T.NIL})
     | A.BreakExp pos -> (match isloop with
@@ -181,18 +185,18 @@ let rec transExp venv tenv ?(isloop:loopenv option) (e:A.exp) : expty =
         )
     | A.LetExp {decs; body; _} ->
         let update_env (old_venv, old_tenv) dec  =
-          transDec old_venv old_tenv dec in
+          transDec lv old_venv old_tenv dec in
         let (new_venv,new_tenv) =
           List.fold_left update_env (venv,tenv) decs in
-        transExp new_venv new_tenv body
+        transExp lv new_venv new_tenv body (* the function body is still in the same frame *)
   in trexp e
-and transVar venv tenv v: expty =
+and transVar (lv:TS.level) venv tenv v: expty =
   let rec trvar = function
   | A.SimpleVar (s,pos) ->
       (match S.look (venv,s) with
       | None -> E.error pos ("undefined variable " ^ S.name s);
                 {exp=();ty=T.NIL}
-      | Some (Env.VarEntry {ty}) -> {exp=();ty=ty}
+      | Some (Env.VarEntry {ty; access=_}) -> {exp=();ty=ty}
       | Some (Env.FunEntry _) -> 
                 E.error pos (S.name s ^ " is not a variable");
                 {exp=();ty=T.NIL})
@@ -210,7 +214,7 @@ and transVar venv tenv v: expty =
         | _ -> E.error pos (S.name s ^ " is not a valid field name");
                {exp=();ty=T.NIL})
   | A.SubscriptVar (var,exp,pos) -> 
-      let {exp=_;ty=exp_ty} = transExp venv tenv exp in
+      let {exp=_;ty=exp_ty} = transExp lv venv tenv exp in
         (match exp_ty with
         | T.INT -> 
           ( let {exp=_;ty=var_ty} = trvar var in
@@ -223,17 +227,17 @@ and transVar venv tenv v: expty =
   in trvar v
 
 
-and transDec venv tenv d : venv * tenv = match d with
-  | A.VarDec {name;escape=_;typ=None;init;pos} ->
-      let {exp=_;ty} = transExp venv tenv init in
+and transDec (lv:TS.level) venv tenv d : venv * tenv = match d with
+  | A.VarDec {name;escape;typ=None;init;pos} ->
+      let {exp=_;ty} = transExp lv venv tenv init in
       (match ty with
       | T.NIL -> E.error pos ("Invalid nil declaration")
-      | _ -> ());(S.enter (venv, name, Env.VarEntry {ty=ty}), tenv)
-  | A.VarDec {name;escape=_;typ=Some (ty_name,ty_pos);init;pos=_} ->
-      let {exp=_;ty} = transExp venv tenv init in
+      | _ -> ());(S.enter (venv, name, Env.VarEntry {ty=ty; access=TS.allocLocal lv escape}), tenv)
+  | A.VarDec {name;escape;typ=Some (ty_name,ty_pos);init;pos=_} ->
+      let {exp=_;ty} = transExp lv venv tenv init in
       let ty' = lookType tenv ty_name ty_pos in
           if (ty == ty' || ty = T.NIL)
-            then (S.enter (venv, name, Env.VarEntry {ty=ty'}), tenv)
+            then (S.enter (venv, name, Env.VarEntry {ty=ty'; access=TS.allocLocal lv escape}), tenv)
             else (E.error ty_pos ("type "^ S.name ty_name ^ " not match");
             (venv,tenv))
   | A.TypeDec tydeclis ->
@@ -263,22 +267,32 @@ and transDec venv tenv d : venv * tenv = match d with
       let find_formal_type
         ({name=_;escape=_;typ=param_typ;pos}:A.field) = 
           lookType tenv param_typ pos in
+      let collect_escape_list (field:A.field) = field.escape in
       let mkheader_sig venv
         ({name;params;result;body=_;pos=_}:A.fundec) =
         let formals = List.map find_formal_type params in
+        let escapes = List.map collect_escape_list params in
         let result = match result with
           | None -> T.UNIT
           | Some (ty,pos) -> lookType tenv ty pos in
-               S.enter (venv,name,Env.FunEntry{formals=formals;result=result}) in
-      let venv' = List.fold_left mkheader_sig venv fundeclis in
+            let new_label = TP.newlabel() in 
+              (* create a new frame name for every new function declaration *)
+               S.enter (venv,name,Env.FunEntry{formals=formals;result=result;
+                                               level=TS.newLevel lv new_label escapes;
+                                               label=new_label}) in
+      let venv' = List.fold_left mkheader_sig venv fundeclis in 
+      (* [venv'] is the VarEnv where all the signatures of functions have been collected,
+         the processing of every function body in the declaration will be based on this
+         VarEnv *)
 
       (* process each function body *)
       let process_function ({name;params;result;body;pos}:A.fundec) =
         let enter_args venv
-          ({name;escape=_;typ=param_typ;pos}:A.field) = 
-          S.enter (venv, name, Env.VarEntry {ty=lookType tenv param_typ pos}) in
+          ({name;escape;typ=param_typ;pos}:A.field) = 
+          S.enter (venv, name,  Env.VarEntry {ty=lookType tenv param_typ pos;
+                                              access=TS.allocLocal lv escape}) in
         let func_venv = List.fold_left enter_args venv' params in
-        let {exp=_;ty=ret_ty} = transExp func_venv tenv body in
+        let {exp=_;ty=ret_ty} = transExp lv func_venv tenv body in
         let result = match result with
           | None -> T.UNIT
           | Some (ty,pos) -> lookType tenv ty pos in
@@ -353,5 +367,5 @@ let transProg  (e:A.exp): unit =
   (* pre-process the AST, make sure that the "escape" label 
     is correctly set for every parameter *)
 
-  let {exp=_;ty=_} = transExp Env.base_venv Env.base_tenv e in
+  let {exp=_;ty=_} = transExp TS.outermost Env.base_venv Env.base_tenv e in
     ()

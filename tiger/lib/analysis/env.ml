@@ -1,7 +1,13 @@
 (* type access *)
 module T = Types;;
-type enventry = VarEntry of {ty : T.ty}
-              | FunEntry of {formals: T.ty list; result: T.ty}
+type enventry = VarEntry of { ty : Types.ty;            (** for type check *)
+                              access: Translate.access  (** for frame allocation *)
+                            }
+              | FunEntry of { formals: Types.ty list;   (** for type check *)
+                              result: Types.ty;         (** for type check *)
+                              level: Translate.level;   (** for frame allocation *)
+                              label: Temp.label         (** frame name *)
+                            }
 
 let base_tenv: T.ty Ast.Symbol.table =
   let open Ast.Symbol in
@@ -21,16 +27,36 @@ let open Ast.Symbol in
 let stand_lib = 
   let open Types in
   [
-    ("print", FunEntry {formals=[STRING];result=UNIT});
-    ("flush", FunEntry {formals=[];result=UNIT});
-    ("getchar",FunEntry {formals=[];result=STRING});    
-    ("ord",FunEntry {formals=[STRING];result=INT});
-    ("chr",FunEntry {formals=[INT];result=STRING});
-    ("size",FunEntry {formals=[STRING];result=INT});
-    ("substring",FunEntry {formals=[STRING;INT;INT];result=STRING});
-    ("concat",FunEntry {formals=[STRING;STRING];result=STRING});
-    ("not",FunEntry {formals=[INT];result=INT});
-    ("exit",FunEntry {formals=[INT];result=UNIT})
+    ("print", FunEntry { formals=[STRING]; result=UNIT;
+                         level=Translate.outermost;
+                         label=Temp.newlabel()});
+    ("flush", FunEntry{ formals=[];result=UNIT;
+                        level=Translate.outermost;
+                        label=Temp.newlabel()});
+    ("getchar",FunEntry { formals=[];result=STRING;
+                          level=Translate.outermost;
+                          label=Temp.newlabel()});
+    ("ord",FunEntry {formals=[STRING];result=INT;
+                     level=Translate.outermost;
+                     label=Temp.newlabel()});
+    ("chr",FunEntry {formals=[INT];result=STRING;
+                     level=Translate.outermost;
+                     label=Temp.newlabel()});
+    ("size",FunEntry {formals=[STRING];result=INT;
+                      level=Translate.outermost;
+                      label=Temp.newlabel()});
+    ("substring",FunEntry {formals=[STRING;INT;INT];result=STRING;
+                           level=Translate.outermost;
+                           label=Temp.newlabel()});
+    ("concat",FunEntry {formals=[STRING;STRING];result=STRING;
+                        level=Translate.outermost;
+                        label=Temp.newlabel()});
+    ("not",FunEntry {formals=[INT];result=INT;
+                     level=Translate.outermost;
+                     label=Temp.newlabel()});
+    ("exit",FunEntry {formals=[INT];result=UNIT;
+                      level=Translate.outermost;
+                      label=Temp.newlabel()});
   ] in
   let update_table tab elem =
     enter (tab, symbol (fst elem), snd elem) in

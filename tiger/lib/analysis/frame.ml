@@ -9,7 +9,7 @@ module type AbstractFrame = sig (* same definition in frame.mli *)
      an example implementation will be like *)
   
   
-  val newFrame :  Temp.label (* names *) -> bool list (* formals *) -> frame 
+  val newFrame :  Temp.label (* name *) -> bool list (* formals *) -> frame 
   
   val name : frame -> Temp.label
   
@@ -35,8 +35,8 @@ module MIPSFrame = struct
   *)
   
   
-  let newFrame (names: Temp.label) (formals: bool list) : frame = 
-    let _ = names in
+  let newFrame (name: Temp.label) (formals: bool list) : frame = 
+    let _ = name in
     let _ = formals in  ()
   (** to make a new frame for a function (f:Temp.label) with a list of
      booleans indicating whether the parameter is escaped:
