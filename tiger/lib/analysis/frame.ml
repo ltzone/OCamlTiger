@@ -10,9 +10,9 @@ module type AbstractFrame = sig (* same definition in frame.mli *)
 
   val outermost_frame : frame
   
-  val newFrame :  Temp.label (* name *) -> bool list (* formals *) -> frame 
+  val newFrame :  Ast.Temp.label (* name *) -> bool list (* formals *) -> frame 
   
-  val name : frame -> Temp.label
+  val name : frame -> Ast.Temp.label
   
   val formals: frame -> access list
   
@@ -27,24 +27,24 @@ module MIPSFrame = struct
                                            offset (of word) from the frame pointer, 
                                           + indicates higher address, 
                                           - indicates lower address *)
-              | InReg of Temp.temp    (** access to temporaries *)
+              | InReg of Ast.Temp.temp    (** access to temporaries *)
   (** describes the formals and locals that may be in the frame or registers  *)
   
-  type frame = {name: Temp.label; args: access list; mutable locals: access list} 
+  type frame = {name: Ast.Temp.label; args: access list; mutable locals: access list} 
   (* TODO not sure is correct for locals *)
   (** holds information about formal parameters and local variables 
   allocated to a frame *)
 
-  let outermost_frame = {name=Temp.newlabel (); args=[]; locals=[]}
+  let outermost_frame = {name=Ast.Temp.newlabel (); args=[]; locals=[]}
   
-  let newFrame (name: Temp.label) (formals: bool list) : frame = 
+  let newFrame (name: Ast.Temp.label) (formals: bool list) : frame = 
     let rec walk_formals cur_idx rem_formals =
       match rem_formals with
       | [] -> []
       | true :: formals' ->
           (InFrame cur_idx) :: walk_formals (cur_idx + 1) formals'
       | false :: formals' ->
-          (InReg (Temp.newtemp())) :: walk_formals cur_idx formals'  in
+          (InReg (Ast.Temp.newtemp())) :: walk_formals cur_idx formals'  in
     let formals_access = walk_formals 0 formals in
     { args=formals_access; locals=[]; name=name }
   (** Create a new frame, and make sure that all formals are allocated
@@ -59,7 +59,7 @@ module MIPSFrame = struct
     starting from offset 0.  *)
   
   
-  let name (fr: frame) : Temp.label = fr.name
+  let name (fr: frame) : Ast.Temp.label = fr.name
   (** read the label name of the frame *)
   
   let formals (fr: frame) : access list = fr.args
@@ -71,7 +71,7 @@ module MIPSFrame = struct
       let local_num = List.length fr.locals - 1 in
       let new_access = InFrame local_num in
         fr.locals <- new_access::fr.locals; new_access
-    else (InReg (Temp.newtemp()))
+    else (InReg (Ast.Temp.newtemp()))
   (** will return an InFrame access with an offset from the frame pointer,
       if the escape boolean is false, then the variable can be returned
       as an access to register *)

@@ -11,9 +11,14 @@ let newtemp () =
     
 let makestring t = "t" ^ Int.to_string t
 
-module Table = Map.Make(Int)
 
-type label = Ast.Symbol.symbol
+module Table  = Table.IntMapTable(struct
+  type key = temp
+  let getInt n = n
+end)
+
+
+type label = Symbol.symbol
 
 let postinc x =
   let i = !x in
@@ -22,7 +27,7 @@ let postinc x =
 let labs = ref 0
 
 
-let newlabel () = Ast.Symbol.symbol("L" ^ Int.to_string (postinc labs))
+let newlabel () = Symbol.symbol("L" ^ Int.to_string (postinc labs))
 
-let namedlabel = Ast.Symbol.symbol
+let namedlabel = Symbol.symbol
 

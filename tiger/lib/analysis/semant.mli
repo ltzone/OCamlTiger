@@ -1,7 +1,7 @@
 type venv = Env.enventry Ast.Symbol.table
-type tenv = Types.ty Ast.Symbol.table
+type tenv = Ast.Types.ty Ast.Symbol.table
 
-type expty = {exp: Translate.exp; ty: Types.ty}
+type expty = {exp: Translate.exp; ty: Ast.Types.ty}
 
 val transProg: Ast.Absyn.exp -> unit 
 

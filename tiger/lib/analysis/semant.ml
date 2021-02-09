@@ -1,14 +1,14 @@
 module A = Ast.Absyn;;
-module T = Types;;
+module T = Ast.Types;;
 module S = Ast.Symbol;;
 module E = Errormsg;;
 module TS = Translate;;
-module TP = Temp;;
+module TP = Ast.Temp;;
 
 type venv = Env.enventry Ast.Symbol.table
 type tenv = T.ty Ast.Symbol.table
 
-type expty = {exp: Translate.exp; ty: Types.ty}
+type expty = {exp: Translate.exp; ty: T.ty}
 
 type loopenv = IsLoop
 

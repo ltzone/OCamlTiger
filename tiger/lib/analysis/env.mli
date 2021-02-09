@@ -1,12 +1,14 @@
+module T = Ast.Types
+
 (* type access *)
-type enventry = VarEntry of { ty : Types.ty;            (** for type check *)
+type enventry = VarEntry of { ty : T.ty;            (** for type check *)
                               access: Translate.access  (** for frame allocation *)
                             }
-              | FunEntry of { formals: Types.ty list;   (** for type check *)
-                              result: Types.ty;         (** for type check *)
+              | FunEntry of { formals: T.ty list;   (** for type check *)
+                              result: T.ty;         (** for type check *)
                               level: Translate.level;   (** for frame allocation *)
-                              label: Temp.label         (** frame name *)
+                              label: Ast.Temp.label         (** frame name *)
                             }
 
-val base_tenv: Types.ty Ast.Symbol.table
+val base_tenv: T.ty Ast.Symbol.table
 val base_venv: enventry Ast.Symbol.table

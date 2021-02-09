@@ -20,7 +20,7 @@ module type AbstractFrame = sig
    val outermost_frame : frame
    
    
-   val newFrame :  Temp.label (* names *) -> bool list (* formals *) -> frame 
+   val newFrame :  Ast.Temp.label (* names *) -> bool list (* formals *) -> frame 
    (** to make a new frame for a function (f:Temp.label) with a list of
       booleans indicating whether the parameter is escaped:
       (i.e. passed by reference, address is taken, 
@@ -36,7 +36,7 @@ module type AbstractFrame = sig
       to the calling convention of the target machine. *)
    
    
-   val name : frame -> Temp.label
+   val name : frame -> Ast.Temp.label
    
    
    val formals: frame -> access list

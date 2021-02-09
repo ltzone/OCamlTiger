@@ -31,7 +31,7 @@ let outermost : level =  {frame=FR.outermost_frame; parent=None}
 *)
 
 
-let newLevel  (parent:level) (name: Temp.label) (formals:bool list): level =
+let newLevel  (parent:level) (name: Ast.Temp.label) (formals:bool list): level =
   let new_frame = FR.newFrame name (true::formals) in
       (* an extra parameter [true] is passed to the [newFrame] function so
          so that fp will point to the static link of the current frame *)

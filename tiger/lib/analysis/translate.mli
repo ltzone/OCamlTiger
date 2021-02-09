@@ -44,7 +44,7 @@ val outermost: level
 *)
 
 
-val newLevel : level (* parent *) -> Temp.label (* name *) 
+val newLevel : level (* parent *) -> Ast.Temp.label (* name *) 
                 -> bool list (* formals *) -> level
 (** will be called by transDec in the semantic analysis phase,
     a new 'nesting level' for each function will be created.

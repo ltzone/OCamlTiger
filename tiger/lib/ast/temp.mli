@@ -9,9 +9,10 @@ val newtemp : unit -> temp
 val makestring: temp -> string
 
 module Table : sig
-  
+  include Table.TABLE
 end
 
-type label = Ast.Symbol.symbol
+
+type label = Symbol.symbol
 val newlabel : unit -> label
 val namedlabel : string -> label

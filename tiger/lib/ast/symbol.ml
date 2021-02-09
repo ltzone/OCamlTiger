@@ -20,12 +20,12 @@ let symbol name =
 
 let name (s,_) = s
 
-let getInt (_,n) = n
-
 (* Use a balanced BST to store and index strings *)
-module IntBinaryMap = Map.Make(Int)
+module Table = Table.IntMapTable(struct 
+        type key = symbol
+				let getInt (_,n) = n end)
 
-type 'a table = 'a IntBinaryMap.t
-let empty = IntBinaryMap.empty
-let enter (t, k, a) = IntBinaryMap.add (getInt k) a t
-let look (t, k) = IntBinaryMap.find_opt (getInt k) t
+type 'a table= 'a Table.table
+let empty = Table.empty
+let enter = Table.enter
+let look = Table.look

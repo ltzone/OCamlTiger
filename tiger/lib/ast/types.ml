@@ -1,15 +1,15 @@
 type unique = unit ref
 
 type ty = 
-  | RECORD of (Ast.Symbol.symbol * ty) list * unique
+  | RECORD of (Symbol.symbol * ty) list * unique
   | NIL
   | INT
   | STRING
   | ARRAY of ty * unique
-  | NAME of Ast.Symbol.symbol * ty option ref
+  | NAME of Symbol.symbol * ty option ref
   | UNIT
 
-module S = Ast.Symbol
+module S = Symbol
 
 let print_ty ty = 
   let rec ty_string = function

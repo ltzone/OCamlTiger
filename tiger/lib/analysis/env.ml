@@ -1,10 +1,12 @@
 (* type access *)
-module T = Types;;
-type enventry = VarEntry of { ty : Types.ty;            (** for type check *)
+module T = Ast.Types;;
+module Temp = Ast.Temp;;
+
+type enventry = VarEntry of { ty : T.ty;            (** for type check *)
                               access: Translate.access  (** for frame allocation *)
                             }
-              | FunEntry of { formals: Types.ty list;   (** for type check *)
-                              result: Types.ty;         (** for type check *)
+              | FunEntry of { formals: T.ty list;   (** for type check *)
+                              result: T.ty;         (** for type check *)
                               level: Translate.level;   (** for frame allocation *)
                               label: Temp.label         (** frame name *)
                             }
@@ -25,7 +27,7 @@ let base_tenv: T.ty Ast.Symbol.table =
 let base_venv: enventry Ast.Symbol.table = 
 let open Ast.Symbol in
 let stand_lib = 
-  let open Types in
+  let open T in
   [
     ("print", FunEntry { formals=[STRING]; result=UNIT;
                          level=Translate.outermost;
