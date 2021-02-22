@@ -20,6 +20,8 @@ end)
 
 type label = Symbol.symbol
 
+let name lab = Symbol.name lab
+
 let postinc x =
   let i = !x in
   x := i + 1; i

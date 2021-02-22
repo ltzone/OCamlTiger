@@ -17,6 +17,13 @@ module type AbstractFrame = sig
    
    *)
 
+   type frag = PROC of { body: Ast.Tree.stm; (** the result returned from [procEntryExit1] *)
+                         frame: frame        (** machine-specific information about local variables and parameters *) 
+                       } (** a descriptor for the function containing the necessary
+                             information produced by the Translate phase *)
+             | STRING of Ast.Temp.label * string  
+   
+
    val outermost_frame : frame
    
    
@@ -47,7 +54,18 @@ module type AbstractFrame = sig
    (** will return an InFrame access with an offset from the frame pointer,
        if the escape boolean is false, then the variable can be returned
        as an access to register *)
-  
+
+   val fp : Ast.Temp.temp
+
+   val word_size : int
+
+   val exp : access -> Ast.Tree.exp -> Ast.Tree.exp
+   (** translate a Frame access into Tree expression, the second argument
+       is used in case of static links, because the address of the frame
+       is only the same as the current frame only when it is accessed from
+       the same level
+   *)
+   
 end
 
 module MIPSFrame : AbstractFrame

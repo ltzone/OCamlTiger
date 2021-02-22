@@ -17,11 +17,32 @@ module type AbstractFrame = sig (* same definition in frame.mli *)
   val formals: frame -> access list
   
   val allocLocal : frame -> bool -> access
+
+  val fp : Ast.Temp.temp
+
+  val word_size : int
+
+  val exp : access -> Ast.Tree.exp -> Ast.Tree.exp
+  (** translate a Frame access into Tree expression,
+      @param access is the access to the variable to be visited
+      @param exp is the static link of the current frame
+      @return the expression of the target variable 
+
+      Note that [exp] is used in case of static links, so that
+      the base of access can be customized
+  *)
+
+  val string : Ast.Temp.label -> string -> string
+  (** takes in a label definition and a string constant,
+      the function should generate the assembly-language instructions
+      required to define and initialize a string literal
+  *)
+
  
 end
 
 
-module MIPSFrame = struct
+module MIPSFrame : AbstractFrame = struct
    
   type access = InFrame of int        (** access to static memory, indicated by
                                            offset (of word) from the frame pointer, 
@@ -75,5 +96,20 @@ module MIPSFrame = struct
   (** will return an InFrame access with an offset from the frame pointer,
       if the escape boolean is false, then the variable can be returned
       as an access to register *)
+  
+  let fp = Ast.Temp.newtemp ()
+  (* TODO: not sure this implementation is reasonable *)
+
+  let word_size = 8
+
+  let exp (acc:access) (fp_exp: Ast.Tree.exp) : Ast.Tree.exp = 
+    match acc with
+    | InReg n -> TEMP n
+    | InFrame k -> MEM (BINOP (PLUS, CONST (k * word_size), fp_exp))
+
+  let string (lab:Ast.Temp.label) str =
+    let lab_name = Ast.Temp.name lab in
+      lab_name ^ ":   .ascii \"" ^ str ^ "\"\n"
+
  
 end

@@ -1,3 +1,6 @@
+module T = Ast.Tree
+module Temp = Ast.Temp
+
 (** Translate module serves the second layer of abstraction between
     in semantic analysis phase.
 
@@ -74,4 +77,28 @@ val allocLocal : level -> bool -> access
 *)
 
 
-type exp = unit (* for temp use *)
+
+type exp = Ex of T.exp (** stands for an "expression", represented as a Tree.exp *)
+         | Nx of T.stm (** stands for "no result", represented as a [Tree] statement *)
+         | Cx of (Temp.label -> Temp.label -> T.stm)
+           (** stands for "conditional", a function from label-pair to statement, make a statement
+               given a true destination and false destination *)
+
+val unEx : exp -> T.exp (** convert any expression to a value expression *)
+
+val unNx : exp -> T.stm (** convert any expression to a no result expression *)
+
+val unCx : exp -> (Temp.label -> Temp.label -> T.stm)
+(** convert any expression to a conditional expression *)
+
+
+
+
+val simpleVar : access -> level -> exp
+(** will be called when a [SimpleVar (s:symbol)] is encountered,
+    @param access is the access of the variable obtained from [Translate.allocLocal]
+    @param level is the level where the variable is used
+    @return the expression of the variable
+*)
+
+
