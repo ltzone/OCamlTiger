@@ -94,7 +94,7 @@ val unCx : exp -> (Temp.label -> Temp.label -> T.stm)
 
 
 
-val simpleVar : access -> level -> exp
+val simpleVar : access -> level -> T.exp
 (** will be called when a [SimpleVar (s:symbol)] is encountered,
     @param access is the access of the variable obtained from [Translate.allocLocal]
     @param level is the level where the variable is used

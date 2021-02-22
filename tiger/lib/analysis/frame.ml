@@ -8,6 +8,12 @@ module type AbstractFrame = sig (* same definition in frame.mli *)
   (** holds information about formal parameters and local variables 
   allocated to a frame *)
 
+  type frag = PROC of { body: Ast.Tree.stm; (** the result returned from [procEntryExit1] *)
+                         frame: frame        (** machine-specific information about local variables and parameters *) 
+                       } (** a descriptor for the function containing the necessary
+                             information produced by the Translate phase *)
+             | STRING of Ast.Temp.label * string  
+
   val outermost_frame : frame
   
   val newFrame :  Ast.Temp.label (* name *) -> bool list (* formals *) -> frame 
@@ -55,6 +61,12 @@ module MIPSFrame : AbstractFrame = struct
   (* TODO not sure is correct for locals *)
   (** holds information about formal parameters and local variables 
   allocated to a frame *)
+
+  type frag = PROC of { body: Ast.Tree.stm; (** the result returned from [procEntryExit1] *)
+                         frame: frame        (** machine-specific information about local variables and parameters *) 
+                       } (** a descriptor for the function containing the necessary
+                             information produced by the Translate phase *)
+             | STRING of Ast.Temp.label * string  
 
   let outermost_frame = {name=Ast.Temp.newlabel (); args=[]; locals=[]}
   

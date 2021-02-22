@@ -23,7 +23,6 @@ module type AbstractFrame = sig
                              information produced by the Translate phase *)
              | STRING of Ast.Temp.label * string  
    
-
    val outermost_frame : frame
    
    
@@ -65,6 +64,12 @@ module type AbstractFrame = sig
        is only the same as the current frame only when it is accessed from
        the same level
    *)
+
+   val string : Ast.Temp.label -> string -> string
+  (** takes in a label definition and a string constant,
+      the function should generate the assembly-language instructions
+      required to define and initialize a string literal
+  *)
    
 end
 
