@@ -94,7 +94,7 @@ val unCx : exp -> (Temp.label -> Temp.label -> T.stm)
 
 
 
-val simpleVar : access -> level -> T.exp
+val simpleVar : access -> level -> exp
 (** will be called when a [SimpleVar (s:symbol)] is encountered,
     @param access is the access of the variable obtained from [Translate.allocLocal]
     @param level is the level where the variable is used
@@ -102,3 +102,49 @@ val simpleVar : access -> level -> T.exp
 *)
 
 
+val fieldVar : exp -> int -> exp
+(** will be called when a [FieldVar (var, symbol)] is encountered,
+    @param base_var is the tree expression of the base variable
+    @param field_idx is the order of occurence of the field in the
+           record, starting from 0
+    @return the expression of the field
+*)
+
+val subscriptVar : exp -> exp -> exp
+(** will be called when a [Subscript (var, exp)] is encountered,
+    @param base_var is the tree expression of the base address of the array
+    @param idx is the tree expression of the index
+    @return the expression of the subscript
+*)
+
+val opExp : Ast.Absyn.oper -> exp -> exp -> exp
+(** will be called when an [OpExp (left, oper, right)] is encountered,
+    @return the expression of the result of the operator
+
+    Note that our compiler treat unary negation as a subtraction from zero,
+    this is feasible since the Tiger language does not support floating-point
+    numbers. However, in a real compiler, such implementation will lead to 
+    failures. Our tree intermediate representation will need modification then.
+*)
+
+val derefEqExp : Ast.Absyn.oper -> exp -> exp -> exp
+(** will be called when an [OpExp (left, EQ/NEQ, right)] where [left] and [right]
+    are both array or record type is encountered,
+    @return the expression of the result of the operator
+
+    Note that our compiler treat unary negation as a subtraction from zero,
+    this is feasible since the Tiger language does not support floating-point
+    numbers. However, in a real compiler, such implementation will lead to 
+    failures. Our tree intermediate representation will need modification then.
+*)
+
+
+val ifExp1 : exp -> exp -> exp
+(** will be called when an [IfExp (test, then', None)] is encountered,
+    @return the expression of the result of the branch expression
+*)
+
+val ifExp2 : exp -> exp -> exp -> exp
+(** will be called when an [IfExp (test, then', Some else')] is encountered,
+    @return the expression of the result of the branch expression
+*)
